@@ -1,5 +1,0 @@
-deepface
-Pillow
-opencv-python
-
-
