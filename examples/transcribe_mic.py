@@ -15,7 +15,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Streaming transcription from microphone via Riva AI Services",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
+    )   
     parser.add_argument("--input-device", type=int, default=default_device_index, help="An input audio device to use.")
     parser.add_argument("--list-devices", action="store_true", help="List input audio device indices.")
     parser = add_asr_config_argparse_parameters(parser, profanity_filter=True)
