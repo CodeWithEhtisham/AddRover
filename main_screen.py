@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QFrame
-from PyQt5.QtCore import QThread, pyqtSignal, QUrl
+from PyQt5.QtCore import QThread, pyqtSignal, QUrl, QTimer
 from PyQt5 import uic
 import sys
 import cv2
@@ -9,7 +9,7 @@ import riva.client
 from riva.client.argparse_utils import add_asr_config_argparse_parameters, add_connection_argparse_parameters
 import riva.client.audio_io
 import requests
-from PyQt5.QtCore import QTimer
+
 # Load the UI file
 UI_FILE = 'ui/main.ui'
 Ui_MainWindow, _ = uic.loadUiType(UI_FILE)
@@ -36,8 +36,8 @@ class SpeechRecognitionThread(QThread):
         )
 
         with riva.client.audio_io.MicrophoneStream(
-            16000,
-            4000,  # Make sure this number fits your needs
+            rate=16000,
+            chunk=4000,  # Make sure this number fits your needs
         ) as audio_chunk_iterator:
             responses = asr_service.streaming_response_generator(
                 audio_chunks=audio_chunk_iterator,
@@ -71,70 +71,73 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         self.player.setMedia(QMediaContent(QUrl.fromLocalFile(self.video_path)))
         self.player.play()
         self.player.stateChanged.connect(self.handle_state_changed)
-        # show video widget in the qframe
-
 
         self.api_url = "http://127.0.0.1:5000/api"
         self.pending_question = ""
         self.listening = False
-        self.timer = QTimer()  # Create a QTimer instance
-        self.timer.setInterval(2000)  # Set the interval to 1 second (adjust as needed)
+        self.timer = QTimer()
+        self.timer.setInterval(3000)
         self.timer.timeout.connect(self.on_timer_timeout)
-
-
+        self.api_response = None  # Store the API response here
 
     def handle_state_changed(self, state):
         if state == QMediaPlayer.StoppedState:
             self.player.play()
 
     def start_listening(self):
+        print("start listening")
         if self.thread is None or not self.thread.isRunning():
+            print("start thread if")
             self.thread = SpeechRecognitionThread()
             self.thread.recognized.connect(self.handle_recognition)
             self.thread.start()
             self.listening = True
             self.timer.start()
+        else:
+            print("start thread else")
+            self.listening = True
+            self.timer.start()
 
     def handle_recognition(self, transcription):
-        print(transcription)
-        # if self.listening:
-        self.lineEdit.setText(transcription)
+        if self.listening:
+            print(transcription)
+            self.lineEdit.setText(transcription)
 
-        # If the user speaks, reset the timer
-        self.timer.start()
+            # If the user speaks, reset the timer
+            self.timer.start()
 
     def on_timer_timeout(self):
-        print("Timer timed out.",self.timer.isActive())
-        # If the timer times out (user stopped speaking), and we are still listening
-        print("Timer timed out and we are still listening.", self.listening)
         if self.timer.isActive():
-            # Stop listening and make the API call
             self.listening = False
             self.timer.stop()
-            print("text:",self.lineEdit.text())
-            # Create a JSON object with the question
-            question_json = {
-                "messages": self.lineEdit.text()
-            }
+            if self.lineEdit.text() != "":
+                self.pending_question = self.lineEdit.text()  # Save the question to send to the API
+                self.send_api_request()
 
-            # Make the API call with a POST request
-            # if self.lineEdit.text() != "":
-            #     response = requests.post(self.api_url, json=question_json)
-            #     if response.status_code==200:
-            #         response_json = response.json()
-            #         print(response_json)
-            #         self.lineEdit.setText(response_json["response"])
-            #     else:
-            #         print("Error: ",response.status_code)
-
+    def send_api_request(self):
+        question_json = {
+            "messages": self.pending_question
+        }
+        print(question_json)
+        # Make the API call with a POST request
+        response = requests.post(self.api_url, json=question_json)
+        if response.status_code == 200:
+            response_json = response.json()
+            result = response_json['response']
+            print(result)
+            self.api_response = result
+            self.lineEdit.setText(result)
+            QTimer.singleShot(3000, self.start_listening)  # Start listening again after 3 seconds
+        else:
+            print("Error: ", response.status_code)
+            self.listening = True
+            self.timer.start()
 
 def main():
     app = QApplication(sys.argv)
     window = MainScreen()
-    window.show()  # Open the window
-    # window.showFullScreen()
+    window.show()
     sys.exit(app.exec_())
-
 
 if __name__ == '__main__':
     main()
