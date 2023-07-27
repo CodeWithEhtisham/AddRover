@@ -8,6 +8,7 @@ class ShowAds(Thread):
     def __init__(self, path):
         Thread.__init__(self)
         self.path = path
+        self.show_user_frame = False  # Shared variable
 
     def run(self):
         print("Ads Thread started")
@@ -24,10 +25,12 @@ class ShowAds(Thread):
                     ret, frame = cap_ad.read()
                     if ret:
                         # Adjust frame size to full screen resolution
+                        if self.show_user_frame:
+                            frame = user_frame  # Show user frame and prediction
                         cv2.imshow("Frame", frame)
                         time.sleep(0.1)
 
-                        if cv2.waitKey(1) & 0xFF == ord("q") or not self.repeat:
+                        if cv2.waitKey(1) & 0xFF == ord("q"):
                             break
                     else:
                         break
@@ -56,9 +59,11 @@ class FaceDetection(Thread):
                 frame = cv2.resize(frame, (640, 360))
                 try:
                     result = DeepFace.extract_faces(frame, detector_backend='ssd', align=True, enforce_detection=False)
-                except KeyError:
+                except KeyError as e:
+                    print("key error",e)
                     result = None
 
+                print(result[0]['facial_area'])
                 if result:
                     data = result[0]['facial_area']
                     x, y, w, h = data['x'], data['y'], data['w'], data['h']
@@ -66,14 +71,15 @@ class FaceDetection(Thread):
                     distance = self.calculate_distance(face_width)
 
                     if distance < 50:  # You can adjust this threshold for when to stop the ads
-                        ads_thread.repeat = False
+                        ads_thread.show_user_frame = True  # Set the shared variable
+                        user_frame = frame.copy()  # Save user frame for the ShowAds thread
                     else:
-                        ads_thread.repeat = True
+                        ads_thread.show_user_frame = False
 
                     if x and y:
                         frame = cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
                     else:
-                        print("Face not detected")
+                        print("Face not detected", x, y)
 
                     distance_text = f"Distance: {distance:.2f} cm"
                     cv2.putText(frame, distance_text, (x, y - 10), cv2.FONT_HERSHEY_PLAIN, 1.0, (0, 255, 0), 2)
