@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="assets">
+    <file>icons/mic.png</file>
+  </qresource>
+</RCC>

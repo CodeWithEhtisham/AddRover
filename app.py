@@ -7,7 +7,7 @@ from deepface import DeepFace
 
 focal_length = 615  # Adjust this value based on your setup and camera focal length
 actual_face_width = 14
-ads_folder = "ads"
+ads_folder = "face_and_ads/ads"
 ads_list = [os.path.join(ads_folder, f) for f in os.listdir(ads_folder)]
 
 def calculate_distance(face_width, focal_length, actual_face_width):
