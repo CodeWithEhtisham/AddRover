@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QFrame
 from PyQt5.QtCore import QThread, pyqtSignal, QUrl, QTimer
 from PyQt5 import uic
 import sys
-import cv2
+# import cv2
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 import riva.client
@@ -15,6 +15,7 @@ import os
 UI_FILE = 'ui/main.ui'
 Ui_MainWindow, _ = uic.loadUiType(UI_FILE)
 path = os.path.dirname(os.path.abspath(__file__))
+# os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/home/ehtisham/.local/lib/python3.8/site-packages/cv2/qt/plugins'
 
 class SpeechRecognitionThread(QThread):
     recognized = pyqtSignal(str)
@@ -59,7 +60,7 @@ class MainScreen(QMainWindow, Ui_MainWindow):
 
         # Create a QMediaPlayer
         self.video_path = os.path.join(path, "animation/aladdin-and-the-king-of-thieves-genie.mp4")
-        self.cap = cv2.VideoCapture(self.video_path)
+        # self.cap = cv2.VideoCapture(self.video_path)
 
         # Create a QVideoWidget and set it as the central widget of the QFrame
         self.video_widget = QVideoWidget(self.frame_2)
@@ -138,6 +139,10 @@ def main():
     app = QApplication(sys.argv)
     window = MainScreen()
     window.show()
+    # window.show()
+    # check window show or not
+    # if window.isVisible():
+    #     print("Window is visible")
     sys.exit(app.exec_())
 
 if __name__ == '__main__':

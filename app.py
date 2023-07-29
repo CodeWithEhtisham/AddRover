@@ -4,6 +4,18 @@ from threading import Thread
 import time
 import random
 from deepface import DeepFace
+from main_screen import MainScreen
+# from PyQt5.QtWidgets import QApplication
+import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QFrame
+from PyQt5.QtCore import QThread, pyqtSignal, QUrl, QTimer
+from PyQt5 import uic
+import sys
+import os
+
+import os
+
+
 
 focal_length = 615  # Adjust this value based on your setup and camera focal length
 actual_face_width = 14
@@ -17,7 +29,9 @@ cap = cv2.VideoCapture(0)
 ads = cv2.VideoCapture(ads_list[0])
 ads_active = True  # Flag to track whether ads frame is currently being displayed
 ads_window_created = False  # Flag to track whether ads window is created
-
+app = Thread(target=QApplication(sys.argv).exec_)
+window = MainScreen()
+frame_count = 0
 while True:
     rett, user_frame = cap.read()
     ret, ads_frame = ads.read()
@@ -41,12 +55,19 @@ while True:
                 distance_text = f"Distance: {distance:.2f} cm"
                 cv2.putText(user_frame, distance_text, (x, y - 10), cv2.FONT_HERSHEY_PLAIN, 1.0, color, 2)
                 if x and y:
+                    frame_count = 0
                     user_frame = cv2.rectangle(user_frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
                     print("user is near to camera distance is ", distance)
+                    # main_screen.show()
                     if ads_window_created:
                         cv2.destroyWindow("ads_frame")
                         ads_window_created = False
                     ads_active = False
+                    # if window.isVisible():
+                    #     frame_count += 1
+                    # else:
+                    #     window.show()
+                    #     frame_count += 1
                 else:
                     print("face not detected if is running")
                     if not ads_active:
@@ -56,6 +77,12 @@ while True:
                     else:
                         cv2.imshow("ads_frame", ads_frame)
             else:
+                # frame_count+=1
+                # if frame_count > 200:
+                #     window.hide()
+                #     frame_count = 0
+                # if main_screen.is_visible():
+                #     main_screen.hide()
                 print("user is far away from camera distance is ", distance)
                 if not ads_active:
                     cv2.imshow("ads_frame", ads_frame)
