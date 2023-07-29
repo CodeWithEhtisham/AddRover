@@ -15,7 +15,6 @@ import os
 UI_FILE = 'ui/main.ui'
 Ui_MainWindow, _ = uic.loadUiType(UI_FILE)
 path = os.path.dirname(os.path.abspath(__file__))
-# os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/home/ehtisham/.local/lib/python3.8/site-packages/cv2/qt/plugins'
 
 class SpeechRecognitionThread(QThread):
     recognized = pyqtSignal(str)
