@@ -154,14 +154,21 @@ class MainScreen(QMainWindow, Ui_MainWindow):
 
 focal_length = 615  # Adjust this value based on your setup and camera focal length
 actual_face_width = 14
-ads_folder = "face_and_ads/ads"
-ads_list = [os.path.join(ads_folder, f) for f in os.listdir(ads_folder)]
+# ads_folder = "face_and_ads/ads"
+# ads_list = [os.path.join(ads_folder, f) for f in os.listdir(ads_folder)]
+ads_folder = {
+    "female":"face_and_ads/ads/millenium jewel.mp4",
+    "male":"face_and_ads/ads/millenium food court.mp4"
+}
+
+ads_list = list(ads_folder.values())
+print(ads_list)
 
 def calculate_distance(face_width, focal_length, actual_face_width):
     return (actual_face_width * focal_length) / face_width
 
 cap = cv2.VideoCapture(0)
-ads = cv2.VideoCapture(ads_list[0])
+ads = cv2.VideoCapture(r"face_and_ads/ads/Millenium mall Quetta.mp4")
 ads_active = True  # Flag to track whether ads frame is currently being displayed
 ads_window_created = False  # Flag to track whether ads window is created
 os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/home/carl/.local/lib/python3.8/site-packages/cv2/qt/plugins/platforms'
@@ -188,10 +195,18 @@ while True:
             distance = calculate_distance(face_width, focal_length, actual_face_width)
             print(distance)
             if distance <= 51:
-                color = (0, 255, 0)
-                distance_text = f"Distance: {distance:.2f} cm"
-                cv2.putText(user_frame, distance_text, (x, y - 10), cv2.FONT_HERSHEY_PLAIN, 1.0, color, 2)
+                # color = (0, 255, 0)
+                # distance_text = f"Distance: {distance:.2f} cm"
+                # cv2.putText(user_frame, distance_text, (x, y - 10), cv2.FONT_HERSHEY_PLAIN, 1.0, color, 2)
+                # get gender of user
                 if x and y:
+                    gender= DeepFace.analyze(
+                        img_path = user_frame,
+                        actions = ['age','gender'],
+                        detector_backend = 'ssd',
+                        enforce_detection = False)[0]
+                    print(gender)
+                    ads=cv2.VideoCapture(ads_folder[gender])
                     frame_count = 0
                     user_frame = cv2.rectangle(user_frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
                     print("user is near to camera distance is ", distance)

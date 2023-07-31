@@ -39,10 +39,14 @@ while True:
         frame = cv2.resize(frame, (640, 360))
         try:
             result = DeepFace.extract_faces(frame, detector_backend = 'ssd', align = True, enforce_detection = False)
-        except KeyError:
+        except Exception as e:
+            print(e)
             result = None
+            break
             continue
         if result:
+            # check if face detected or not
+            # if result[0]['facial_area'] == {}:
             data=result[0]['facial_area']
             print(data)
             # {'x': 217, 'y': 50, 'w': 258, 'h': 258}
