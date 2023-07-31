@@ -164,7 +164,7 @@ cap = cv2.VideoCapture(0)
 ads = cv2.VideoCapture(ads_list[0])
 ads_active = True  # Flag to track whether ads frame is currently being displayed
 ads_window_created = False  # Flag to track whether ads window is created
-os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/home/ehtisham/.local/lib/python3.8/site-packages/cv2/qt/plugins/platforms'
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/home/carl/.local/lib/python3.8/site-packages/cv2/qt/plugins/platforms'
 
 app = QApplication(sys.argv)
 window = MainScreen()

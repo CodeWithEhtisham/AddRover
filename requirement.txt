@@ -1,6 +1,6 @@
 deepface
 Pillow
-opencv-python==4.3.0.36
+opencv-python
 pyqt5
 pyside2
 nvidia-riva-client
