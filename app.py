@@ -14,7 +14,7 @@ import sys
 import os
 import os
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QFrame
-from PyQt5.QtCore import QThread, pyqtSignal, QUrl, QTimer
+from PyQt5.QtCore import QThread, pyqtSignal, QUrl, QTimer,QObject
 from PyQt5 import uic
 import sys
 # import cv2
@@ -65,7 +65,9 @@ class SpeechRecognitionThread(QThread):
                 if response.results:
                     transcription = response.results[0].alternatives[0].transcript
                     self.recognized.emit(transcription)  # Emit the recognized signal with the transcription
-
+# Create a custom signal to notify the main thread when the user is near the camera
+class UserNearSignal(QObject):
+    user_near = pyqtSignal()
 
 class MainScreen(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -73,6 +75,9 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.btn_mic.clicked.connect(self.start_listening)
         self.thread = None
+        self.user_near_signal = UserNearSignal()
+        self.user_near_signal.user_near.connect(self.handle_user_near)
+
 
         # Create a QMediaPlayer
         self.video_path = os.path.join(path, "animation/aladdin-and-the-king-of-thieves-genie.mp4")
@@ -101,6 +106,10 @@ class MainScreen(QMainWindow, Ui_MainWindow):
     def handle_state_changed(self, state):
         if state == QMediaPlayer.StoppedState:
             self.player.play()
+    def handle_user_near(self):
+        # The slot to be called when the user is near the camera
+        print("User is near to camera")
+        self.show()
 
     def start_listening(self):
         print("start listening")
@@ -152,6 +161,7 @@ class MainScreen(QMainWindow, Ui_MainWindow):
             self.timer.start()
 
 
+
 focal_length = 615  # Adjust this value based on your setup and camera focal length
 actual_face_width = 14
 ads_folder = "face_and_ads/ads"
@@ -160,19 +170,44 @@ ads_list = [os.path.join(ads_folder, f) for f in os.listdir(ads_folder)]
 def calculate_distance(face_width, focal_length, actual_face_width):
     return (actual_face_width * focal_length) / face_width
 
-cap = cv2.VideoCapture(4)
+ads_active = False  # Flag to track whether ads frame is currently being displayed
+ads_window_created = True  # Flag to track whether ads window is created
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/home/hamza/.local/lib/python3.8/site-packages/cv2/qt/plugins/platforms'
+
+def calculate_distance_and_start_thread(face_width, focal_length, actual_face_width):
+    # Calculate distance using face_width, focal_length, and actual_face_width
+    # ... (your distance calculation code)
+
+    # Start the QTimer to trigger the Qt application in the main thread
+    qt_app_timer.start(0)
+
+def start_qt_app():
+    # Start the Qt application window in the main thread
+    app.exec_()
+# app = QApplication(sys.argv)
+# window = MainScreen()
+frame_count = 0
+thread = None
+user_near = False
+ads_frame_created = True
+
+# Create a QTimer to start the Qt application in the main thread
+qt_app_timer = QTimer()
+qt_app_timer.timeout.connect(start_qt_app)
+# ... (previous code)
+cap = cv2.VideoCapture(0)
 ads = cv2.VideoCapture(ads_list[0])
-ads_active = True  # Flag to track whether ads frame is currently being displayed
-ads_window_created = False  # Flag to track whether ads window is created
-os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/usr/local/lib/python3.8/dist-packages/cv2/qt/plugins/platforms'
 
 app = QApplication(sys.argv)
 window = MainScreen()
-frame_count = 0
+ads_frame_created = True
+user_near = False
+
 while True:
     rett, user_frame = cap.read()
     ret, ads_frame = ads.read()
     print(rett, ret)
+
     if ret:
         user_frame = cv2.resize(user_frame, (640, 360))
         try:
@@ -181,53 +216,36 @@ while True:
             print("face not detected except is running")
             result = None
             continue
+
         if result:
             data = result[0]['facial_area']
             x, y, w, h = data['x'], data['y'], data['w'], data['h']
             face_width = w
             distance = calculate_distance(face_width, focal_length, actual_face_width)
-            print(distance)
-            if distance <= 51:
-                color = (0, 255, 0)
-                distance_text = f"Distance: {distance:.2f} cm"
-                cv2.putText(user_frame, distance_text, (x, y - 10), cv2.FONT_HERSHEY_PLAIN, 1.0, color, 2)
-                if x and y:
-                    frame_count = 0
-                    user_frame = cv2.rectangle(user_frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-                    print("user is near to camera distance is ", distance)
-                    # main_screen.show()
-                    if ads_window_created:
-                        cv2.destroyWindow("ads_frame")
-                        ads_window_created = False
-                    ads_active = False
-                    if window.isVisible():
-                        frame_count += 1
-                    else:
-                        window.show()
-                        frame_count += 1
-                else:
-                    print("face not detected if is running")
-                    if not ads_active:
-                        cv2.imshow("ads_frame", ads_frame)
-                        ads_window_created = True
-                        ads_active = True
-                    else:
-                        cv2.imshow("ads_frame", ads_frame)
+            # print(distance)
+
+            if distance <= 51 and x and y:
+                if window.isVisible():continue
+                print("user is near to camera distance is ", distance)
+                user_near = True
+
+                if ads_frame_created:
+                    cv2.destroyWindow("ads_frame")
+                    ads_frame_created = False
+
+                if not window.isVisible():  # Show the window if it's not visible
+                    window.show()
+
             else:
-                frame_count+=1
-                print("frame count########################################", frame_count)
-                if frame_count > 200:
-                    window.hide()
-                    frame_count = 0
-                if window.isVisible():
-                    window.hide()
                 print("user is far away from camera distance is ", distance)
-                if not ads_active:
-                    cv2.imshow("ads_frame", ads_frame)
-                    ads_window_created = True
-                    ads_active = True
-                else:
-                    cv2.imshow("ads_frame", ads_frame)
+                user_near = False
+                if window.isVisible():  # Hide the window if it's visible
+                    window.hide()
+                    ads_frame_created = True
+
+                if ads_frame_created:
+                    cv2.imshow('ads_frame', ads_frame)
+
         else:
             print("face not detected else is running")
 
@@ -237,7 +255,14 @@ while True:
         print("ads is running", rand)
         ads = cv2.VideoCapture(rand)
 
-    # cv2.imshow("user_frame", user_frame)
+    # Process Qt application events
+    app.processEvents()
+
+    if user_near and not window.isVisible():
+        # Run the Qt application event loop for a short duration (10ms) to check for events
+        QTimer.singleShot(10, app.quit)
+        app.exec_()
+
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 

@@ -27,7 +27,7 @@ backends = [
 def calculate_distance(face_width, focal_length, actual_face_width):
     return (actual_face_width * focal_length) / face_width
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(4)
 focal_length = 615  # Adjust this value based on your setup and camera focal length
 actual_face_width = 14  # Actual width of the face in centimeters
 
@@ -42,7 +42,6 @@ while True:
         except Exception as e:
             print(e)
             result = None
-            break
             continue
         if result:
             # check if face detected or not
