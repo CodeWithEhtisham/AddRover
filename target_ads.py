@@ -49,7 +49,7 @@ def calculate_distance(face_width, focal_length, actual_face_width):
 
 cap = cv2.VideoCapture(0)
 ads = cv2.VideoCapture(r"face_and_ads/ads/Millenium mall Quetta.mp4")
-os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = r'/home/hamza/.local/lib/python3.8/site-packages/cv2/qt/plugins/platforms'
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = r'/home/carl/.local/lib/python3.8/site-packages/cv2/qt/plugins/platforms'
 
 # app = QApplication(sys.argv)
 # window = MainScreen()

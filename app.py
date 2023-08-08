@@ -172,7 +172,7 @@ def calculate_distance(face_width, focal_length, actual_face_width):
 
 ads_active = False  # Flag to track whether ads frame is currently being displayed
 ads_window_created = True  # Flag to track whether ads window is created
-os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/home/hamza/.local/lib/python3.8/site-packages/cv2/qt/plugins/platforms'
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/home/carl/.local/lib/python3.8/site-packages/cv2/qt/plugins/platforms'
 
 def calculate_distance_and_start_thread(face_width, focal_length, actual_face_width):
     # Calculate distance using face_width, focal_length, and actual_face_width
@@ -198,11 +198,11 @@ qt_app_timer.timeout.connect(start_qt_app)
 cap = cv2.VideoCapture(0)
 ads = cv2.VideoCapture(ads_list[0])
 
-app = QApplication(sys.argv)
+app = QApplication([])
 window = MainScreen()
 ads_frame_created = True
 user_near = False
-
+thread=None
 while True:
     rett, user_frame = cap.read()
     ret, ads_frame = ads.read()
@@ -222,29 +222,23 @@ while True:
             x, y, w, h = data['x'], data['y'], data['w'], data['h']
             face_width = w
             distance = calculate_distance(face_width, focal_length, actual_face_width)
-            # print(distance)
 
             if distance <= 51 and x and y:
-                if window.isVisible():continue
+                if not window.isVisible():  # Start the window if it's not already running
+                    thread = Thread(target=window.show).start()
                 print("user is near to camera distance is ", distance)
                 user_near = True
 
-                if ads_frame_created:
+                if window.isVisible() and thread is not None:  # Hide the window if it's visible
                     cv2.destroyWindow("ads_frame")
                     ads_frame_created = False
 
-                if not window.isVisible():  # Show the window if it's not visible
-                    window.show()
-
             else:
                 print("user is far away from camera distance is ", distance)
-                user_near = False
-                if window.isVisible():  # Hide the window if it's visible
-                    window.hide()
+                if window.isVisible() and thread is not None: # Hide the window if it's visible
+                    thread.join()
                     ads_frame_created = True
-
-                if ads_frame_created:
-                    cv2.imshow('ads_frame', ads_frame)
+                cv2.imshow('ads_frame', ads_frame)
 
         else:
             print("face not detected else is running")
@@ -254,9 +248,6 @@ while True:
         rand = random.choice(ads_list)
         print("ads is running", rand)
         ads = cv2.VideoCapture(rand)
-
-    # Process Qt application events
-    app.processEvents()
 
     if user_near and not window.isVisible():
         # Run the Qt application event loop for a short duration (10ms) to check for events

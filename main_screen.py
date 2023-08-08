@@ -73,7 +73,7 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         self.player.play()
         self.player.stateChanged.connect(self.handle_state_changed)
 
-        self.api_url = "http://127.0.0.1:5000/api"
+        self.api_url = "http://192.168.16.125:5000/api"
         self.pending_question = ""
         self.listening = False
         self.timer = QTimer()
