@@ -58,7 +58,7 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         self.thread = None
 
         # Create a QMediaPlayer
-        self.video_path = os.path.join(path, "animation/aladdin-and-the-king-of-thieves-genie.mp4")
+        self.video_path = os.path.join(path, "face_and_ads/ads/millenium food court.mp4")
         # self.cap = cv2.VideoCapture(self.video_path)
 
         # Create a QVideoWidget and set it as the central widget of the QFrame
