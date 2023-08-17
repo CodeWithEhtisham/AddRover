@@ -1,20 +1,26 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QFrame
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QFrame,QLabel,QDesktopWidget
 from PyQt5.QtCore import QThread, pyqtSignal, QUrl, QTimer
 from PyQt5 import uic
 import sys
 # import cv2
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QCamera, QCameraInfo
 from PyQt5.QtMultimediaWidgets import QVideoWidget
+from PyQt5.QtGui import QImage, QPixmap
+
 import riva.client
 from riva.client.argparse_utils import add_asr_config_argparse_parameters, add_connection_argparse_parameters
 import riva.client.audio_io
 import requests
 import os
+import cv2
+
 
 # Load the UI file
 UI_FILE = 'ui/main.ui'
 Ui_MainWindow, _ = uic.loadUiType(UI_FILE)
 path = os.path.dirname(os.path.abspath(__file__))
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/home/carl/.local/lib/python3.8/site-packages/cv2/qt/plugins/platforms'
+video_path = os.path.join(path, "face_and_ads/ads/millenium food court.mp4")
 
 class SpeechRecognitionThread(QThread):
     recognized = pyqtSignal(str)
@@ -49,29 +55,48 @@ class SpeechRecognitionThread(QThread):
                     transcription = response.results[0].alternatives[0].transcript
                     self.recognized.emit(transcription)  # Emit the recognized signal with the transcription
 
+class VideoThread(QThread):
+    frame_signal = pyqtSignal(QImage)
+
+    def run(self):
+        ads = cv2.VideoCapture(video_path)  # Use appropriate camera index or video file path
+        cap = cv2.VideoCapture(0)
+        # Get the screen dimensions
+        screen = QDesktopWidget().screenGeometry()
+        screen_width = screen.width()
+        screen_height = screen.height()
+        while True:
+            ads_ret, ads_frame = ads.read()
+            ret, frame = cap.read()
+            if not ads_ret and not ret:
+                break
+            frame = cv2.resize(frame, (640, 360))
+            try:
+                result=DeepFace.extractFace(frame, detector_backend='ssd', enforce_detection=False)
+            except Exception as e:
+                print(e)
+                
+            print("ads_frame",ads_frame.shape)
+            # Calculate the target dimensions for resizing
+            resized_frame = cv2.resize(ads_frame, (screen_width, screen_height-40))
+            frame_rgb = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
+            h, w, ch = frame_rgb.shape
+            image = QImage(frame_rgb.data, w, h, ch * w, QImage.Format_RGB888)
+            self.frame_signal.emit(image)
+
+
 
 class MainScreen(QMainWindow, Ui_MainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         self.setupUi(self)
-        self.btn_mic.clicked.connect(self.start_listening)
+        # self.btn_mic.clicked.connect(self.start_listening)
         self.thread = None
 
         # Create a QMediaPlayer
-        self.video_path = os.path.join(path, "face_and_ads/ads/millenium food court.mp4")
-        # self.cap = cv2.VideoCapture(self.video_path)
-
-        # Create a QVideoWidget and set it as the central widget of the QFrame
-        self.video_widget = QVideoWidget(self.frame_2)
-        self.layout = QVBoxLayout(self.frame_2)
-        self.layout.addWidget(self.video_widget)
-
-        # Create a QMediaPlayer and set the QVideoWidget as its video output
-        self.player = QMediaPlayer()
-        self.player.setVideoOutput(self.video_widget)
-        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(self.video_path)))
-        self.player.play()
-        self.player.stateChanged.connect(self.handle_state_changed)
+        self.video_thread = VideoThread()
+        self.video_thread.frame_signal.connect(self.update_video_frame)
+        self.video_thread.start()
 
         self.api_url = "http://192.168.16.125:5000/api"
         self.pending_question = ""
@@ -81,9 +106,9 @@ class MainScreen(QMainWindow, Ui_MainWindow):
         self.timer.timeout.connect(self.on_timer_timeout)
         self.api_response = None  # Store the API response here
 
-    def handle_state_changed(self, state):
-        if state == QMediaPlayer.StoppedState:
-            self.player.play()
+    def update_video_frame(self, image):
+        # Set the pixmap of the video_label to display the image
+        self.video_frame.setPixmap(QPixmap.fromImage(image))
 
     def start_listening(self):
         print("start listening")
@@ -137,11 +162,8 @@ class MainScreen(QMainWindow, Ui_MainWindow):
 def main():
     app = QApplication(sys.argv)
     window = MainScreen()
-    window.show()
+    window.showFullScreen()
     # window.show()
-    # check window show or not
-    # if window.isVisible():
-    #     print("Window is visible")
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
