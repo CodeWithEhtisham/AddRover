@@ -1,0 +1,23 @@
+{% load static %}
+<html class="no-js" lang="">
+{% include 'base_header.html'%}
+<body>
+    <div class="header-top-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                    <div class="logo-area">
+                        <!-- <a href="#"><img src="{% static 'img/logo/logo.png'%}" alt="" /></a> -->
+                        <a href="#"><h1 style="font-style: italic;color: white;">+Rover</h1></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Header Top Area -->
+{% block content%}
+{% endblock %}
+
+{% include 'base_script.html' %}
+</body>
+</html>
