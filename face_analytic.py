@@ -20,9 +20,9 @@ import sys
 # import cv2
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-import riva.client
-from riva.client.argparse_utils import add_asr_config_argparse_parameters, add_connection_argparse_parameters
-import riva.client.audio_io
+# import riva.client
+# from riva.client.argparse_utils import add_asr_config_argparse_parameters, add_connection_argparse_parameters
+# import riva.client.audio_io
 import requests
 import os
 
@@ -37,8 +37,9 @@ actual_face_width = 14
 # ads_folder = "face_and_ads/ads"
 # ads_list = [os.path.join(ads_folder, f) for f in os.listdir(ads_folder)]
 ads_folder = {
-    "Woman":"face_and_ads/ads/man_ads.mp4",
-    "Man":"face_and_ads/ads/woman_ads.mp4"
+    "Man":["face_and_ads/ads/man_ads.mp4"],
+    "Woman":["face_and_ads/ads/woman_ads.mp4"],
+    "Both":['face_and_ads/ads/main_ads.mp4']
 }
 
 ads_list = list(ads_folder.values())
@@ -55,8 +56,10 @@ os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = r'/home/carl/.local/lib/python3.8/si
 # window = MainScreen()
 frame_count = 0
 status = True
+analytics=[]
 
 while True:
+    
     rett, user_frame = cap.read()
     ret, ads_frame = ads.read()
     if ret and rett:
@@ -64,50 +67,46 @@ while True:
         try:
             result =DeepFace.analyze(
                             img_path = user_frame,
-                            actions = ['gender','age'],
+                            actions = ['gender'],
                             detector_backend = 'ssd',
                             enforce_detection = True)
         except Exception as e:
-            print("face not detected except is running")
+            # print("face not detected except is running")
             result = None
-        analytics=[]
         if result:
             for res in result:
                 gender=res['dominant_gender']
-                age=res['age']
+                # age=res['age']
                 analytics.append(
                     {
                         "gender":gender,
-                        "age":age,
+                        # "age":age,
                         "ads":"ads path"
                     }
                 )
-                # if gender=="Man":
-                #     analytics.append(
-                #     {
-                #         "gender":gender,
-                #         "age":53,
-                #         "ads":"ads path"
-                #     }
-                # )
-                # else:
-                #     analytics.append(
-                #         {
-                #         "gender":gender,
-                #         "age":50,
-                #         "ads":"ads path"
-                #     }
-                # )
-        print(analytics)
         cv2.imshow("ads_frame", ads_frame)
 
         
 
     else:
-        # get random ads
-        rand = random.choice(ads_list)
-        print("ads is running", rand)
-        ads = cv2.VideoCapture("face_and_ads/ads/main_ads.mp4")
+        man_count = sum(1 for entry in analytics if entry['gender'] == 'Man')
+        woman_count = sum(1 for entry in analytics if entry['gender'] == 'Woman')
+        # Randomly select an ad based on the counts
+        if man_count > woman_count:
+            selected_ad = random.choice(ads_folder['Man'])
+        elif woman_count > man_count:
+            selected_ad = random.choice(ads_folder['Woman'])
+        else:
+            if not ads_folder['Both']:
+                selected_ad = random.choice([ads_folder['Man']+ads_folder['Woman']])
+            else:
+                selected_ad = random.choice(ads_folder['Both'])
+        print(f"number of man ads: {man_count}")
+        print(f"number of woman ads: {woman_count}")
+        print(selected_ad)
+        analytics=[]
+        # time.sleep(2)
+        ads = cv2.VideoCapture(selected_ad)
 
     # cv2.imshow("user_frame", user_frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
