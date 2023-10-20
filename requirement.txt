@@ -1,5 +1,4 @@
-deepface
-Pillow
-opencv-python
+django
+djangorestframework
 
 
