@@ -44,21 +44,103 @@ $(function() {
     });
   }
 
-  if($('#chartjsDoughnut').length) {
-    new Chart($('#chartjsDoughnut'), {
+  if($('#shopdoughnut').length) {
+    new Chart($('#shopdoughnut'), {
       type: 'doughnut',
       data: {
-        labels: ["Africa", "Asia", "Europe"],
+        labels: ["BA", "Gold City", "Millennium"],
         datasets: [
           {
-            label: "Population (millions)",
+            label: "Total Shops in Malls",
             backgroundColor: ["#7ee5e5","#f77eb9","#4d8af0"],
-            data: [2478,4267,1334]
+            data: [50,15,35]
           }
         ]
+      },options: {
+        cutoutPercentage: 50,
+        legend: {
+          position: 'right',
+          align: 'start',
+          labels: {
+            fontColor: '#444', // Legend text color
+            fontSize: 14 // Legend text size
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: true,
+        title: {
+          display: true,
+          text: 'shop Distribution',
+          fontSize: 20, // Title font size
+          fontColor: '#333' // Title text color
+        },
+        tooltips: {
+          callbacks: {
+            label: function (tooltipItem, data) {
+              var dataset = data.datasets[0];
+              var total = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
+                return previousValue + currentValue;
+              });
+              var currentValue = dataset.data[tooltipItem.index];
+              var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+              return currentValue + ' (' + percentage + '%)';
+            }
+          }
+        }
       }
     });
   }
+
+  if ($('#adsdoughnut').length) {
+    var ctx = $('#adsdoughnut');
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ["BA", "Gold City", "Millennium"],
+        datasets: [
+          {
+            label: "Total Ads in Malls",
+            backgroundColor: ["#77c1c1", "#e76a96", "#6b92d9"], // Slightly darker colors
+            data: [50, 15, 35]
+          }
+        ]
+      },
+      options: {
+        cutoutPercentage: 50,
+        legend: {
+          position: 'right',
+          align: 'start',
+          labels: {
+            fontColor: '#444', // Legend text color
+            fontSize: 14 // Legend text size
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: true,
+        title: {
+          display: true,
+          text: 'Ads Distribution',
+          fontSize: 20, // Title font size
+          fontColor: '#333' // Title text color
+        },
+        tooltips: {
+          callbacks: {
+            label: function (tooltipItem, data) {
+              var dataset = data.datasets[0];
+              var total = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
+                return previousValue + currentValue;
+              });
+              var currentValue = dataset.data[tooltipItem.index];
+              var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+              return currentValue + ' (' + percentage + '%)';
+            }
+          }
+        }
+      }
+    });
+  }
+  
+  
 
   if($('#chartjsArea').length) {
     new Chart($('#chartjsArea'), {
@@ -230,29 +312,45 @@ $(function() {
     new Chart($('#chartjsMixedBar'), {
       type: 'bar',
       data: {
-        labels: ["1900", "1950", "1999", "2050"],
+        labels: ["Mar", "April", "May", "June"],
         datasets: [{
-            label: "Europe",
+            label: "BA",
             type: "line",
             borderColor: "#66d1d1",
             backgroundColor: "rgba(0,0,0,0)",
-            data: [408,547,675,734],
+            data: [200,400,150,500],
             fill: false
           }, {
-            label: "Africa",
+            label: "Gold City",
             type: "line",
             borderColor: "#ff3366",
             backgroundColor: "rgba(0,0,0,0)",
-            data: [133,221,783,2478],
+            data: [600,300,450,700],
             fill: false
-          }, {
-            label: "Europe",
+          },{
+            label: "Millinium",
+            type: "line",
+            borderColor: "#ff3366",
+            backgroundColor: "rgba(0,0,0,0)",
+            data: [600,200,349,700],
+            fill: false
+          }, 
+          {
+            label: "BA",
             type: "bar",
             backgroundColor: "#f77eb9",
             // backgroundColor: "rgba(0,0,0,0)",
-            data: [408,547,675,734],
+            data: [200,400,150,500],
           }, {
-            label: "Africa",
+            label: "Gold City",
+            type: "bar",
+            backgroundColor: "#7ee5e5",
+            backgroundColorHover: "#3e95cd",
+            // backgroundColor: "rgba(0,0,0,0)",
+            data: [133,221,783,2478]
+          },
+          {
+            label: "Millinium",
             type: "bar",
             backgroundColor: "#7ee5e5",
             backgroundColorHover: "#3e95cd",

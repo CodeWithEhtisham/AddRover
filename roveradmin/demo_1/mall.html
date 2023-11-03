@@ -44,40 +44,19 @@
               <span class="link-title" style="font-size: larger;">Dashboard</span>
             </a>
           </li>
-        
+          
           <li class="nav-item mt-2">
             <a href="shop.html" class="nav-link">
               <i class="" data-feather="box"></i>
               <span class="link-title" style="font-size: larger;">Shops</span>
             </a>
           </li>
-        
-          <li class="nav-item mt-2">
-            <a href="mall.html" class="nav-link" data-bs-toggle="collapse" data-bs-target="#mallDropdown">
-                <i class="" data-feather="box"></i>
-                <span class="link-title" style="font-size: larger;">Mall</span>
-                <i class="bi bi-chevron-down"></i>
-            </a>
-            <div id="mallDropdown" class="collapse">
-                <ul class="list-unstyled mt-2">
-                    <li>
-                        <a href="mall1.html" class="nav-link">Mall 1</a>
-                    </li>
-                    <li>
-                        <a href="mall2.html" class="nav-link">Mall 2</a>
-                    </li>
-                    <!-- Add more mall links as needed -->
-                </ul>
-            </div>
-        </li>
-        
           <li class="nav-item mt-2">
             <a href="service.html" class="nav-link">
               <i class="" data-feather="box"></i>
               <span class="link-title" style="font-size: larger;">Services</span>
             </a>
           </li>
-        
           <li class="nav-item mt-2">
             <a href="map.html" class="nav-link">
               <i class="" data-feather="box"></i>
@@ -85,7 +64,6 @@
             </a>
           </li>
         </ul>
-        
       </div>
     </nav>
     
@@ -345,35 +323,164 @@
         </div> <!-- row -->
 
         <div class="row">
-          <div class="col-xl-6 grid-margin stretch-card">
-            <div class="card">
-              <div class="card-body"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
-                <h6 class="card-title">Shop chart</h6>
-                <canvas id="shopdoughnut" width="616" height="308" style="display: block; width: 616px; height: 308px;" class="chartjs-render-monitor"></canvas>
-              </div>
-            </div>
-          </div>
-          <!-- -------------------------- -->
-          <div class="col-xl-6 grid-margin stretch-card">
-            <div class="card">
-              <div class="card-body"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
-                <h6 class="card-title">ADs chart</h6>
-                <canvas id="adsdoughnut" width="616" height="308" style="display: block; width: 616px; height: 308px;" class="chartjs-render-monitor"></canvas>
+          <div class="col-12 col-xl-12 grid-margin stretch-card">
+            <div class="card overflow-hidden">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-4 mb-md-3">
+                  <h6 class="card-title mb-0">Revenue</h6>
+                  <div class="dropdown">
+                    <button class="btn p-0" type="button" id="dropdownMenuButton3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="eye" class="icon-sm mr-2"></i> <span class="">View</span></a>
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="edit-2" class="icon-sm mr-2"></i> <span class="">Edit</span></a>
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="trash" class="icon-sm mr-2"></i> <span class="">Delete</span></a>
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="printer" class="icon-sm mr-2"></i> <span class="">Print</span></a>
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="download" class="icon-sm mr-2"></i> <span class="">Download</span></a>
+                    </div>
+                  </div>
+                </div>
+                <div class="row align-items-start mb-2">
+                  <div class="col-md-7">
+                  </div>
+                  <div class="col-md-5 d-flex justify-content-md-end">
+                    <div class="btn-group mb-3 mb-md-0" role="group" aria-label="Basic example">
+                      <button type="button" class="btn btn-outline-primary">Today</button>
+                      <button type="button" class="btn btn-outline-primary d-none d-md-block">Week</button>
+                      <button type="button" class="btn btn-primary">Month</button>
+                      <button type="button" class="btn btn-outline-primary">Year</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="flot-wrapper">
+                  <div id="flotChart1" class="flot-chart"></div>
+                </div>
               </div>
             </div>
           </div>
         </div> <!-- row -->
 
         <div class="row">
-          <div class="col-xl-12 stretch-card">
+          <div class="col-lg-5 col-xl-5 grid-margin stretch-card">
             <div class="card">
-              <div class="card-body"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
-                <h6 class="card-title">Mixed bar chart</h6>
-                <canvas id="chartjsMixedBar" width="616" height="250" style="display: block; width: 616px; height: 308px;" class="chartjs-render-monitor"></canvas>
-              </div>
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-5">
+                  <h6 class="card-title ">Monthly sales</h6>
+                  <div class="dropdown ">
+                    <button class="btn p-0" type="button" id="dropdownMenuButton4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton4">
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="eye" class="icon-sm mr-2"></i> <span class="">View</span></a>
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="edit-2" class="icon-sm mr-2"></i> <span class="">Edit</span></a>
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="trash" class="icon-sm mr-2"></i> <span class="">Delete</span></a>
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="printer" class="icon-sm mr-2"></i> <span class="">Print</span></a>
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="download" class="icon-sm mr-2"></i> <span class="">Download</span></a>
+                    </div>
+                  </div>
+                </div>
+                <div class="monthly-sales-chart-wrapper">
+                  <canvas id="monthly-sales-chart" ></canvas>
+                </div>
+              </div> 
             </div>
           </div>
           
+          <div class="col-lg-7 col-xl-7 stretch-card">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                  <h6 class="card-title mb-0">Record</h6>
+                  <div class="dropdown mb-2">
+                    <button class="btn p-0" type="button" id="dropdownMenuButton7" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <i class="icon-lg text-muted pb-3px" data-feather="more-horizontal"></i>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton7">
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="eye" class="icon-sm mr-2"></i> <span class="">View</span></a>
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="edit-2" class="icon-sm mr-2"></i> <span class="">Edit</span></a>
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="trash" class="icon-sm mr-2"></i> <span class="">Delete</span></a>
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="printer" class="icon-sm mr-2"></i> <span class="">Print</span></a>
+                      <a class="dropdown-item d-flex align-items-center" href="#"><i data-feather="download" class="icon-sm mr-2"></i> <span class="">Download</span></a>
+                    </div>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover mb-0">
+                    <thead>
+                      <tr>
+                        <th class="pt-0">#</th>
+                        <th class="pt-0">Shop Name</th>
+                        <th class="pt-0">Total Ads</th>
+                        <th class="pt-0"></th>
+                        <th class="pt-0">Status</th>
+                        <th class="pt-0">Assign</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>1</td>
+                        <td>NobleUI jQuery</td>
+                        <td>01/01/2020</td>
+                        <td>26/04/2020</td>
+                        <td><span class="badge badge-danger">Released</span></td>
+                        <td>Leonardo Payne</td>
+                      </tr>
+                      <tr>
+                        <td>2</td>
+                        <td>NobleUI Angular</td>
+                        <td>01/01/2020</td>
+                        <td>26/04/2020</td>
+                        <td><span class="badge badge-success">Review</span></td>
+                        <td>Carl Henson</td>
+                      </tr>
+                      <tr>
+                        <td>3</td>
+                        <td>NobleUI ReactJs</td>
+                        <td>01/05/2020</td>
+                        <td>10/09/2020</td>
+                        <td><span class="badge badge-info-muted">Pending</span></td>
+                        <td>Jensen Combs</td>
+                      </tr>
+                      <tr>
+                        <td>4</td>
+                        <td>NobleUI VueJs</td>
+                        <td>01/01/2020</td>
+                        <td>31/11/2020</td>
+                        <td><span class="badge badge-warning">Work in Progress</span>
+                        </td>
+                        <td>Amiah Burton</td>
+                      </tr>
+                      <tr>
+                        <td>5</td>
+                        <td>NobleUI Laravel</td>
+                        <td>01/01/2020</td>
+                        <td>31/12/2020</td>
+                        <td><span class="badge badge-danger-muted text-white">Coming soon</span></td>
+                        <td>Yaretzi Mayo</td>
+                      </tr>
+                      <tr>
+                        <td>6</td>
+                        <td>NobleUI NodeJs</td>
+                        <td>01/01/2020</td>
+                        <td>31/12/2020</td>
+                        <td><span class="badge badge-primary">Coming soon</span></td>
+                        <td>Carl Henson</td>
+                      </tr>
+                      <tr>
+                        <td class="border-bottom">3</td>
+                        <td class="border-bottom">NobleUI EmberJs</td>
+                        <td class="border-bottom">01/05/2020</td>
+                        <td class="border-bottom">10/11/2020</td>
+                        <td class="border-bottom"><span class="badge badge-info-muted">Pending</span></td>
+                        <td class="border-bottom">Jensen Combs</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div> 
+            </div>
+          </div>
         </div> <!-- row -->
 
 			</div>
@@ -401,7 +508,6 @@
   <!-- custom js for this page -->
   <script src="../assets/js/dashboard.js"></script>
   <script src="../assets/js/datepicker.js"></script>
-  <script src="/home/carl/Documents/Ehtisham/AddRover/roveradmin/assets/js/chartjs.js"></script>
 	<!-- end custom js for this page -->
 </body>
 </html>    
