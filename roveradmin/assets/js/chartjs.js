@@ -44,101 +44,108 @@ $(function() {
     });
   }
 
-  if($('#shopdoughnut').length) {
+  if ($('#shopdoughnut').length) {
     new Chart($('#shopdoughnut'), {
-      type: 'doughnut',
-      data: {
-        labels: ["BA", "Gold City", "Millennium"],
-        datasets: [
-          {
-            label: "Total Shops in Malls",
-            backgroundColor: ["#7ee5e5","#f77eb9","#4d8af0"],
-            data: [50,15,35]
-          }
-        ]
-      },options: {
-        cutoutPercentage: 50,
-        legend: {
-          position: 'right',
-          align: 'start',
-          labels: {
-            fontColor: '#444', // Legend text color
-            fontSize: 14 // Legend text size
-          }
+        type: 'doughnut',
+        data: {
+            labels: ["BA", "Gold City", "Millennium"],
+            datasets: [
+                {
+                    label: "Total Shops in Malls",
+                    backgroundColor: ["#7ee5e5", "#f77eb9", "#4d8af0"],
+                    data: [50, 15, 35]
+                }
+            ]
         },
-        responsive: true,
-        maintainAspectRatio: true,
-        title: {
-          display: true,
-          text: 'shop Distribution',
-          fontSize: 20, // Title font size
-          fontColor: '#333' // Title text color
-        },
-        tooltips: {
-          callbacks: {
-            label: function (tooltipItem, data) {
-              var dataset = data.datasets[0];
-              var total = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
-                return previousValue + currentValue;
-              });
-              var currentValue = dataset.data[tooltipItem.index];
-              var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
-              return currentValue + ' (' + percentage + '%)';
+        options: {
+            cutoutPercentage: 50,
+            legend: {
+                position: 'right',
+                align: 'start',
+                labels: {
+                    fontColor: '#444',
+                    fontSize: 16 // Increased legend font size
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: true,
+            title: {
+                display: true,
+                text: 'Shop Distribution',
+                fontSize: 24, // Increased title font size
+                fontColor: '#333'
+            },
+            tooltips: {
+                callbacks: {
+                    label: function (tooltipItem, data) {
+                        var dataset = data.datasets[0];
+                        var total = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
+                            return previousValue + currentValue;
+                        });
+                        var currentValue = dataset.data[tooltipItem.index];
+                        var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+                        return currentValue + ' (' + percentage + '%)';
+                    }
+                },
+                titleFontSize: 16, // Increased tooltip title font size
+                bodyFontSize: 14 // Increased tooltip body font size
             }
-          }
         }
-      }
     });
-  }
+}
+
 
   if ($('#adsdoughnut').length) {
     var ctx = $('#adsdoughnut');
     new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ["BA", "Gold City", "Millennium"],
-        datasets: [
-          {
-            label: "Total Ads in Malls",
-            backgroundColor: ["#77c1c1", "#e76a96", "#6b92d9"], // Slightly darker colors
-            data: [50, 15, 35]
-          }
-        ]
-      },
-      options: {
-        cutoutPercentage: 50,
-        legend: {
-          position: 'right',
-          align: 'start',
-          labels: {
-            fontColor: '#444', // Legend text color
-            fontSize: 14 // Legend text size
-          }
+        type: 'doughnut',
+        data: {
+            labels: ["BA", "Gold City", "Millennium"],
+            datasets: [
+                {
+                    label: "Total Ads in Malls",
+                    backgroundColor: ["#77c1c1", "#e76a96", "#6b92d9"],
+                    data: [50, 15, 35]
+                }
+            ]
         },
-        responsive: true,
-        maintainAspectRatio: true,
-        title: {
-          display: true,
-          text: 'Ads Distribution',
-          fontSize: 20, // Title font size
-          fontColor: '#333' // Title text color
-        },
-        tooltips: {
-          callbacks: {
-            label: function (tooltipItem, data) {
-              var dataset = data.datasets[0];
-              var total = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
-                return previousValue + currentValue;
-              });
-              var currentValue = dataset.data[tooltipItem.index];
-              var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
-              return currentValue + ' (' + percentage + '%)';
+        options: {
+            cutoutPercentage: 50,
+            legend: {
+                position: 'right',
+                align: 'start',
+                labels: {
+                    fontColor: '#444',
+                    fontSize: 16 // Increased legend font size
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: true,
+            title: {
+                display: true,
+                text: 'Ads Distribution',
+                fontSize: 24, // Increased title font size
+                fontColor: '#333'
+            },
+            tooltips: {
+                callbacks: {
+                    label: function (tooltipItem, data) {
+                        var dataset = data.datasets[0];
+                        var total = dataset.data.reduce(function (previousValue, currentValue, currentIndex, array) {
+                            return previousValue + currentValue;
+                        });
+                        var currentValue = dataset.data[tooltipItem.index];
+                        var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+                        return currentValue + ' (' + percentage + '%)';
+                    }
+                },
+                titleFontSize: 16, // Increased tooltip title font size
+                bodyFontSize: 14 // Increased tooltip body font size
             }
-          }
         }
-      }
     });
-  }
+}
+
   
   
 

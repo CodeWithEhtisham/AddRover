@@ -44,19 +44,39 @@
               <span class="link-title" style="font-size: larger;">Dashboard</span>
             </a>
           </li>
-          
+        
           <li class="nav-item mt-2">
             <a href="shop.html" class="nav-link">
               <i class="" data-feather="box"></i>
               <span class="link-title" style="font-size: larger;">Shops</span>
             </a>
           </li>
+        
+          <li class="nav-item mt-2">
+            <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#mallDropdown">
+                <i class="" data-feather="box"></i>
+                <span class="link-title" style="font-size: larger;">Mall</span>
+                <i class="bi bi-chevron-down"></i>
+            </a>
+            <div id="mallDropdown" class="collapse">
+                <ul class="list-unstyled mt-2">
+                    <li>
+                        <a href="mall.html" class="nav-link">Mall 1</a>
+                    </li>
+                    <li>
+                        <a href="mall.html" class="nav-link">Mall 2</a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+        
           <li class="nav-item mt-2">
             <a href="service.html" class="nav-link">
               <i class="" data-feather="box"></i>
               <span class="link-title" style="font-size: larger;">Services</span>
             </a>
           </li>
+        
           <li class="nav-item mt-2">
             <a href="map.html" class="nav-link">
               <i class="" data-feather="box"></i>
@@ -64,6 +84,7 @@
             </a>
           </li>
         </ul>
+        
       </div>
     </nav>
     
@@ -491,6 +512,8 @@
 	</div>
 
 	<!-- core:js -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="../assets/vendors/core/core.js"></script>
 	<!-- endinject -->
   <!-- plugin js for this page -->
