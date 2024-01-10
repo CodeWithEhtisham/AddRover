@@ -1,146 +1,118 @@
-(function ($) {
- "use strict";
+/**
+ * Main
+ */
 
-		$(".chosen")[0] && $(".chosen").chosen({
-            width: "100%",
-            allow_single_deselect: !0
-        });
-		/*--------------------------
-		 auto-size Active Class
-		---------------------------- */	
-		$(".auto-size")[0] && autosize($(".auto-size"));
-		/*--------------------------
-		 Collapse Accordion Active Class
-		---------------------------- */	
-		$(".collapse")[0] && ($(".collapse").on("show.bs.collapse", function(e) {
-            $(this).closest(".panel").find(".panel-heading").addClass("active")
-        }), $(".collapse").on("hide.bs.collapse", function(e) {
-            $(this).closest(".panel").find(".panel-heading").removeClass("active")
-        }), $(".collapse.in").each(function() {
-            $(this).closest(".panel").find(".panel-heading").addClass("active")
-        }));
-		/*----------------------------
-		 jQuery tooltip
-		------------------------------ */
-		$('[data-toggle="tooltip"]').tooltip();
-		/*--------------------------
-		 popover
-		---------------------------- */	
-		$('[data-toggle="popover"]')[0] && $('[data-toggle="popover"]').popover();
-		/*--------------------------
-		 File Download
-		---------------------------- */	
-		$('.btn.dw-al-ft').on('click', function(e) {
-			e.preventDefault();
-		});
-		/*--------------------------
-		 Sidebar Left
-		---------------------------- */	
-		$('#sidebarCollapse').on('click', function () {
-			 $('#sidebar').toggleClass('active');
-			 
-		 });
-		$('#sidebarCollapse').on('click', function () {
-			$("body").toggleClass("mini-navbar");
-			SmoothlyMenu();
-		});
-		$('.menu-switcher-pro').on('click', function () {
-			var button = $(this).find('i.nk-indicator');
-			button.toggleClass('notika-menu-befores').toggleClass('notika-menu-after');
-			
-		});
-		$('.menu-switcher-pro.fullscreenbtn').on('click', function () {
-			var button = $(this).find('i.nk-indicator');
-			button.toggleClass('notika-back').toggleClass('notika-next-pro');
-		});
-		/*--------------------------
-		 Button BTN Left
-		---------------------------- */	
-		
-		$(".nk-int-st")[0] && ($("body").on("focus", ".nk-int-st .form-control", function() {
-            $(this).closest(".nk-int-st").addClass("nk-toggled")
-        }), $("body").on("blur", ".form-control", function() {
-            var p = $(this).closest(".form-group, .input-group"),
-                i = p.find(".form-control").val();
-            p.hasClass("fg-float") ? 0 == i.length && $(this).closest(".nk-int-st").removeClass("nk-toggled") : $(this).closest(".nk-int-st").removeClass("nk-toggled")
-        })), $(".fg-float")[0] && $(".fg-float .form-control").each(function() {
-            var i = $(this).val();
-            0 == !i.length && $(this).closest(".nk-int-st").addClass("nk-toggled")
-        });
-		/*--------------------------
-		 mCustomScrollbar
-		---------------------------- */	
-		$(window).on("load",function(){
-			$(".widgets-chat-scrollbar").mCustomScrollbar({
-				setHeight:460,
-				autoHideScrollbar: true,
-				scrollbarPosition: "outside",
-				theme:"light-1"
-			});
-			$(".notika-todo-scrollbar").mCustomScrollbar({
-				setHeight:445,
-				autoHideScrollbar: true,
-				scrollbarPosition: "outside",
-				theme:"light-1"
-			});
-			$(".comment-scrollbar").mCustomScrollbar({
-				autoHideScrollbar: true,
-				scrollbarPosition: "outside",
-				theme:"light-1"
-			});
-		});
-	/*----------------------------
-	 jQuery MeanMenu
-	------------------------------ */
-	jQuery('nav#dropdown').meanmenu();
-	
-	/*----------------------------
-	 wow js active
-	------------------------------ */
-	 new WOW().init();
-	 
-	/*----------------------------
-	 owl active
-	------------------------------ */  
-	$("#owl-demo").owlCarousel({
-      autoPlay: false, 
-	  slideSpeed:2000,
-	  pagination:false,
-	  navigation:true,	  
-      items : 4,
-	  /* transitionStyle : "fade", */    /* [This code for animation ] */
-	  navigationText:["<i class='fa fa-angle-left'></i>","<i class='fa fa-angle-right'></i>"],
-      itemsDesktop : [1199,4],
-	  itemsDesktopSmall : [980,3],
-	  itemsTablet: [768,2],
-	  itemsMobile : [479,1],
-	});
+'use strict';
 
-	/*----------------------------
-	 price-slider active
-	------------------------------ */  
-	  $( "#slider-range" ).slider({
-	   range: true,
-	   min: 40,
-	   max: 600,
-	   values: [ 60, 570 ],
-	   slide: function( event, ui ) {
-		$( "#amount" ).val( "£" + ui.values[ 0 ] + " - £" + ui.values[ 1 ] );
-	   }
-	  });
-	  $( "#amount" ).val( "£" + $( "#slider-range" ).slider( "values", 0 ) +
-	   " - £" + $( "#slider-range" ).slider( "values", 1 ) );  
-	   
-	/*--------------------------
-	 scrollUp
-	---------------------------- */	
-	$.scrollUp({
-        scrollText: '<i class="fa fa-angle-up"></i>',
-        easingType: 'linear',
-        scrollSpeed: 900,
-        animation: 'fade'
-    }); 	   
-	
-	
- 
-})(jQuery); 
+let menu, animate;
+
+(function () {
+  // Initialize menu
+  //-----------------
+
+  let layoutMenuEl = document.querySelectorAll('#layout-menu');
+  layoutMenuEl.forEach(function (element) {
+    menu = new Menu(element, {
+      orientation: 'vertical',
+      closeChildren: false
+    });
+    // Change parameter to true if you want scroll animation
+    window.Helpers.scrollToActive((animate = false));
+    window.Helpers.mainMenu = menu;
+  });
+
+  // Initialize menu togglers and bind click on each
+  let menuToggler = document.querySelectorAll('.layout-menu-toggle');
+  menuToggler.forEach(item => {
+    item.addEventListener('click', event => {
+      event.preventDefault();
+      window.Helpers.toggleCollapsed();
+    });
+  });
+
+  // Display menu toggle (layout-menu-toggle) on hover with delay
+  let delay = function (elem, callback) {
+    let timeout = null;
+    elem.onmouseenter = function () {
+      // Set timeout to be a timer which will invoke callback after 300ms (not for small screen)
+      if (!Helpers.isSmallScreen()) {
+        timeout = setTimeout(callback, 300);
+      } else {
+        timeout = setTimeout(callback, 0);
+      }
+    };
+
+    elem.onmouseleave = function () {
+      // Clear any timers set to timeout
+      document.querySelector('.layout-menu-toggle').classList.remove('d-block');
+      clearTimeout(timeout);
+    };
+  };
+  if (document.getElementById('layout-menu')) {
+    delay(document.getElementById('layout-menu'), function () {
+      // not for small screen
+      if (!Helpers.isSmallScreen()) {
+        document.querySelector('.layout-menu-toggle').classList.add('d-block');
+      }
+    });
+  }
+
+  // Display in main menu when menu scrolls
+  let menuInnerContainer = document.getElementsByClassName('menu-inner'),
+    menuInnerShadow = document.getElementsByClassName('menu-inner-shadow')[0];
+  if (menuInnerContainer.length > 0 && menuInnerShadow) {
+    menuInnerContainer[0].addEventListener('ps-scroll-y', function () {
+      if (this.querySelector('.ps__thumb-y').offsetTop) {
+        menuInnerShadow.style.display = 'block';
+      } else {
+        menuInnerShadow.style.display = 'none';
+      }
+    });
+  }
+
+  // Init helpers & misc
+  // --------------------
+
+  // Init BS Tooltip
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+
+  // Accordion active class
+  const accordionActiveFunction = function (e) {
+    if (e.type == 'show.bs.collapse' || e.type == 'show.bs.collapse') {
+      e.target.closest('.accordion-item').classList.add('active');
+    } else {
+      e.target.closest('.accordion-item').classList.remove('active');
+    }
+  };
+
+  const accordionTriggerList = [].slice.call(document.querySelectorAll('.accordion'));
+  const accordionList = accordionTriggerList.map(function (accordionTriggerEl) {
+    accordionTriggerEl.addEventListener('show.bs.collapse', accordionActiveFunction);
+    accordionTriggerEl.addEventListener('hide.bs.collapse', accordionActiveFunction);
+  });
+
+  // Auto update layout based on screen size
+  window.Helpers.setAutoUpdate(true);
+
+  // Toggle Password Visibility
+  window.Helpers.initPasswordToggle();
+
+  // Speech To Text
+  window.Helpers.initSpeechToText();
+
+  // Manage menu expanded/collapsed with templateCustomizer & local storage
+  //------------------------------------------------------------------
+
+  // If current layout is horizontal OR current window screen is small (overlay menu) than return from here
+  if (window.Helpers.isSmallScreen()) {
+    return;
+  }
+
+  // If current layout is vertical and current window screen is > small
+
+  // Auto update menu collapsed/expanded based on the themeConfig
+  window.Helpers.setCollapsed(true, false);
+})();

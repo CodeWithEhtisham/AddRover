@@ -5,18 +5,36 @@ from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
-def user_login(request):
-    if request.method == 'POST':
-        username = request.POST['email']  # Assuming email is used as the username
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('home')  # Redirect to your desired page after login
-        else:
-            messages.error(request, 'Invalid credentials')
-    return render(request, 'login.html')
+class CustomerLoginView(TemplateView):
+    template_name = 'login.html'
 
+    def get(self, request):
+        return render(request, self.template_name)
+    
+    def post(self, request):
+        if request.method == 'POST':
+            username = request.POST['email']  # Assuming email is used as the username
+            password = request.POST['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('home')  # Redirect to your desired page after login
+            else:
+                messages.error(request, 'Invalid credentials')
+        return render(request, 'login.html')
+
+class CustomerLogoutView(TemplateView):
+    template_name = 'login.html'
+
+    def get(self, request):
+        logout(request)
+        return render(request, self.template_name)
+    
+class CustomerRegisterView(TemplateView):
+    template_name ='register.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
 
 def user_logout(request):
     logout(request)
@@ -24,7 +42,7 @@ def user_logout(request):
 
 class CustomerDashboardView(TemplateView):
 
-    template_name = 'customer_dashboard.html'
+    template_name = 'dashboard.html'
 
     def get(self, request):
         return render(request, self.template_name)

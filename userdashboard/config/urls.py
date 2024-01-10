@@ -18,5 +18,5 @@ from django.urls import include, path
 # from dashboard.views import *
 
 urlpatterns = [
-    path("customer",include("customer.urls")),
+    path("",include("customer.urls")),
 ]
