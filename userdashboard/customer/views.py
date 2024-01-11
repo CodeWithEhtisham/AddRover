@@ -51,7 +51,7 @@ class CustomerDashboardView(TemplateView):
         pass
 
 class AdListView(TemplateView):
-    template_name = 'ad_list.html'
+    template_name = 'ads_list.html'
 
     def get(self,request):
         return render(request, self.template_name)
