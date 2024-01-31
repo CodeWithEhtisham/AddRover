@@ -34,7 +34,7 @@
                             Create your advertisement below and watch them light up our screen in no time.
                           </p>
 
-                          <a href="{% url 'create_ad'%}" class="btn btn-md btn-outline-primary">Create Ad</a>
+                          <a href="{% url 'create_ad'%}" class="btn btn-lg btn-outline-primary">Create Ad</a>
                         </div>
                       </div>
                       <div class="col-sm-5 text-center text-sm-left">
@@ -56,7 +56,6 @@
                         <div class="card">
                             <h5 class="card-header">Your Ad list</h5>
                             <div class="table-responsive text-nowrap">
-                              {% if ads %}
                               <table class="table table-striped">
                                 <thead>
                                   <tr>
@@ -69,7 +68,6 @@
                                 </thead>
 
                                 <tbody class="table-border-bottom-0">
-                                  {% for ad in ads %}
                                   <tr>
                                     <td>
                                       <i class="bx bxl-angular bx-sm text-danger me-3"></i>
@@ -198,10 +196,7 @@
                                     </td>
                                   </tr>
                                 </tbody>
-                                  {%endfor%}
-                                  {% else %}
-                                  <h3 class="card-title text-primary">Sorry we couldn't find any Ads</h3>
-                                  {% endif %}
+                                  <!-- <h3 class="card-title text-primary">Sorry we couldn't find any Ads</h3> -->
                               </table>
                             </div>
                           </div>

@@ -8,6 +8,9 @@ class AdListView(TemplateView):
 
     def get(self,request):
         return render(request, self.template_name)
-    
-    def post(self, request):
-        pass
+
+class AdCreateView(TemplateView):
+    template_name = 'create_ad.html'
+
+    def post(self,request):
+        return render(request, self.template_name)
