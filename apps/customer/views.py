@@ -40,7 +40,7 @@ class CustomerLogoutView(TemplateView):
 
     def get(self, request):
         logout(request)
-        return render(request, self.template_name)
+        return redirect('login')  # Redirect to the login page after logout
     
 class CustomerRegisterView(TemplateView):
     template_name ='register.html'
