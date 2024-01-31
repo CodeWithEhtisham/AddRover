@@ -62,21 +62,3 @@ def user_logout(request):
     logout(request)
     return redirect('login')  # Redirect to the login page after logout
 
-class CustomerDashboardView(TemplateView):
-
-    template_name = 'dashboard.html'
-
-    def get(self, request):
-        return render(request, self.template_name)
-    
-    def post(self, request):
-        pass
-
-class AdListView(TemplateView):
-    template_name = 'ads_list.html'
-
-    def get(self,request):
-        return render(request, self.template_name)
-    
-    def post(self, request):
-        pass

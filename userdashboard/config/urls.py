@@ -18,5 +18,7 @@ from django.urls import include, path
 # from dashboard.views import *
 
 urlpatterns = [
-    path("",include("customer.urls")),
+    path("",include("apps.customer.urls")),
+    path("ads/",include("apps.ads.urls")),
+    path("dashboard/",include("apps.dashboard.urls")),
 ]
