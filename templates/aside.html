@@ -76,6 +76,12 @@
           <div>Ads List</div>
         </a>
       </li>
+      <li class="menu-item {% if url_name == 'create_ad' %}active{% endif %}  open">
+        <a href="{% url 'create_ad' %}" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-home-circle"></i>
+          <div>Create Ad</div>
+        </a>
+      </li>
      
       {% endwith %} 
 

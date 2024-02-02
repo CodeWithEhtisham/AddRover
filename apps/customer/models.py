@@ -1,7 +1,7 @@
-from django.db import models
+# ads/models.py
 
-# Create your models here.
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 
 class Customer(AbstractUser):
     phone = models.CharField(max_length=100)
@@ -11,4 +11,3 @@ class Customer(AbstractUser):
     class Meta:
         verbose_name = 'Customer'
         verbose_name_plural = 'Customers'
-        db_table = 'customers'
