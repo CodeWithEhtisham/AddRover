@@ -4,6 +4,7 @@ from .forms import AdForm
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.shortcuts import redirect
+from .models import Ad
 # from django.http import HttpResponseRedirect
 # Create your views here.
 
@@ -12,7 +13,8 @@ class AdListView(TemplateView):
     template_name = 'ads_list.html'
 
     def get(self,request):
-        return render(request, self.template_name)
+        ads = Ad.objects.filter(customer=request.user)
+        return render(request, self.template_name, {'ads': ads})
 
 class AdCreateView(View):  # Change TemplateView to View
     template_name = 'create_ad.html'

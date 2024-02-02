@@ -19,3 +19,7 @@ class Ad(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def get_ad_type_display(self):
+        # This method returns the display value for the ad_type field
+        return dict(self.ad_type_choices).get(self.ad_type, '')
