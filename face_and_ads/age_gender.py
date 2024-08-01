@@ -30,7 +30,7 @@ while True:
     results=DeepFace.analyze(
       img_path = frame,
       actions = ['age','gender'],
-      detector_backend = backends[-2],
+      detector_backend = 'yolov8',
       enforce_detection = False)[0]
     # [{'age': 30, 'region': {'x': 0, 'y': 0, 'w': 640, 'h': 480}, 'gender': {'Woman': 14.219871163368225, 'Man': 85.78013181686401}, 'dominant_gender': 'Man'}]
 

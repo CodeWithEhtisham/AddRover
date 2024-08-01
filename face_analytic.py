@@ -68,10 +68,10 @@ while True:
             result =DeepFace.analyze(
                             img_path = user_frame,
                             actions = ['gender'],
-                            detector_backend = 'ssd',
+                            detector_backend = 'yolov8',
                             enforce_detection = True)
         except Exception as e:
-            # print("face not detected except is running")
+            print("face not detected except is running",e)
             result = None
         if result:
             for res in result:
