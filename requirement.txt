@@ -1,3 +1,4 @@
+
 deepface
 Pillow
 opencv-python
@@ -6,3 +7,5 @@ pyside2
 nvidia-riva-client
 numpy==1.22
 schedule
+django
+djangorestframework
