@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<body>
+  <!-- Layout wrapper -->
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      <!-- Menu -->
+
+      {% include 'aside.html'%}
+      <!-- / Menu -->
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        <!-- Navbar -->
+
+        {% include 'nav.html'%}
+
+        <!-- / Navbar -->
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <!-- Content -->
+
+          <div class="container-xxl flex-grow-1 container-p-y">
+            <div class="row">
+              <div class="col-lg-12 mb-4 order-0">
+                <div class="card">
+                  <div class="d-flex align-items-end row">
+                    <div class="col-sm-12">
+                      <div class="card-body">
+                        <h3 class="card-title text-primary">Create Slot</h3>
+                      </div>
+                    </div>
+                    <div class="m-5">
+                      <form id="formAuthentication" class="mb-1" action="{% url 'create_slot'%}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                          <ul class="errorlist">
+                            {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                            <li>{{ field }}: {{ error }}</li>
+                            {% endfor %}
+                            {% endfor %}
+                          </ul>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3 row">
+                          <div class="col-md-10 mb-3">
+                            <label for="first_name" class="form-label">Slot Title<span class="required">*</span></label>
+                            <input type="text" class="form-control" id="title" name="title" placeholder="Ad Name"
+                              required />
+                          </div>
+                          <div class="col-md-5 mb-3">
+                            <label for="" class="form-label">Select Ad</label>
+                            <select class="form-select" name="ad_type" id="" aria-label="Default select example">
+                              <option selected="">Select Ad</option>
+                              {% for ad in ads %}
+                              <option value="{{ad.id}}">{{ad.title}}</option>
+                              {%endfor%}
+                            </select>
+                          </div>
+
+                          <div class="col-md-5 mb-3">
+                            <label for="duration" class="form-label">Reserved Slot</label>
+                            <select class="form-select" id="duration" aria-label="Default select example" name="duration">
+                                <option selected="">Select duration</option>
+                                <option value="1">for a Week</option>
+                                <option value="2">for a Month</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Week Date Picker -->
+                        <div class="mb-3 col-4" id="week-picker-div" style="display: none;">
+                            <label for="weekPicker" class="form-label">Select Week</label>
+                            <input class="form-control" type="week" id="weekPicker" name="week" min="">
+                        </div>
+                        
+                        <!-- Month Date Picker -->
+                        <div class="mb-3 col-4" id="month-picker-div" style="display: none;">
+                            <label for="monthPicker" class="form-label">Select Month</label>
+                            <input class="form-control" type="month" id="monthPicker" name="month" min="">
+                        </div>
+                        
+                        <!-- Slot Display -->
+                        <div class="mb-3 col-12" id="available-slots" style="display: none;">
+                            <h5>Available Slots:</h5>
+                            <ul id="slot-list"></ul>
+                        </div>
+
+
+                          <div class="mb-3 col-10 d-flex flex-column align-items-end">
+                            <button type="submit" class="btn btn-primary d-grid w-25 mt-auto">create ad</button>
+                        </div>
+                        
+                    </div>
+
+                    </form>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+
+
+          </div>
+          <!-- / Content -->
+
+          <!-- Footer -->
+          {% include 'footer.html'%}
+          <!-- / Footer -->
+
+          <div class="content-backdrop fade"></div>
+        </div>
+        <!-- Content wrapper -->
+      </div>
+      <!-- / Layout page -->
+    </div>
+
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+  <!-- / Layout wrapper -->
+<!-- Script to toggle between week and month picker -->
+<script>
+  document.getElementById('duration').addEventListener('change', function() {
+      var selectedValue = this.value;
+      var weekPickerDiv = document.getElementById('week-picker-div');
+      var monthPickerDiv = document.getElementById('month-picker-div');
+      document.getElementById('available-slots').style.display = 'none';  // Hide slots initially
+
+      if (selectedValue === '1') {
+          weekPickerDiv.style.display = 'block';  // Show week picker
+          monthPickerDiv.style.display = 'none';  // Hide month picker
+          document.getElementById('weekPicker').addEventListener('change', function() {
+              fetchAvailableSlots('week', this.value);
+          });
+      } else if (selectedValue === '2') {
+          weekPickerDiv.style.display = 'none';  // Hide week picker
+          monthPickerDiv.style.display = 'block';  // Show month picker
+          document.getElementById('monthPicker').addEventListener('change', function() {
+              fetchAvailableSlots('month', this.value);
+          });
+      } else {
+          weekPickerDiv.style.display = 'none';
+          monthPickerDiv.style.display = 'none';
+      }
+  });
+
+  function fetchAvailableSlots(type, value) {
+      // Create AJAX request to fetch slots from the backend
+      const url = '{% url "fetch_slots" %}';  // Backend URL to fetch slots
+      fetch(url, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}',  // CSRF token for security
+          },
+          body: JSON.stringify({ 'type': type, 'value': value })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              displaySlots(data.slots);
+          } else {
+              console.error(data.message);
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+      });
+  }
+
+  function displaySlots(slots) {
+      const slotList = document.getElementById('slot-list');
+      slotList.innerHTML = '';  // Clear previous slots
+      if (slots.length > 0) {
+          document.getElementById('available-slots').style.display = 'block';  // Show available slots section
+          slots.forEach(slot => {
+              const li = document.createElement('li');
+              li.textContent = `Slot ${slot.slot_number}: ${slot.is_available ? 'Available' : 'Reserved'}`;
+              slotList.appendChild(li);
+          });
+      } else {
+          document.getElementById('available-slots').style.display = 'none';  // Hide if no slots
+      }
+  }
+</script>
+  {% include 'script.html'%}
+</body>
+{% endblock %}

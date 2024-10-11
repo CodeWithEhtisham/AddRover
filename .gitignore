@@ -107,7 +107,10 @@ venv.bak/
 
 # mkdocs documentation 
 /site 
-
+yolo_models/
+opencv_models/
+videos/
+*.pt
 # mypy 
 .mypy_cache/ 
 

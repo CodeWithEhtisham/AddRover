@@ -73,16 +73,21 @@
       <li class="menu-item {% if url_name == 'customer_ads' %}active{% endif %}  open">
         <a href="{% url 'customer_ads' %}" class="menu-link">
           <i class="menu-icon tf-icons bx bx-home-circle"></i>
-          <div>Ads List</div>
+          <div>Details</div>
         </a>
       </li>
       <li class="menu-item {% if url_name == 'create_ad' %}active{% endif %}  open">
         <a href="{% url 'create_ad' %}" class="menu-link">
           <i class="menu-icon tf-icons bx bx-home-circle"></i>
-          <div>Create Ad</div>
+          <div>Upload AD</div>
         </a>
       </li>
-     
+      <li class="menu-item {% if url_name == 'create_slot' %}active{% endif %}  open">
+        <a href="{% url 'create_slot' %}" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-home-circle"></i>
+          <div>Get Slot</div>
+        </a>
+      </li>
       {% endwith %} 
 
 
