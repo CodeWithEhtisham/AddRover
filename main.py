@@ -49,6 +49,7 @@ total_count = read_count()
 # Track IDs that have been counted
 counted_ids = set()
 
+# Function to predict age and gender
 def get_age_gender(face_img):
     blob = cv2.dnn.blobFromImage(face_img, 1.0, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
 
@@ -93,28 +94,26 @@ while cap.isOpened():
 
                     # Check if the bottom of the bounding box intersects with the virtual line and if it has not been counted
                     if bottom_center_y >= line_position and track_id not in counted_ids:
-                        # Extract face ROI
-                        face_img = frame[y1:y2, x1:x2]
-                        gender, age = get_age_gender(face_img)
-
                         # Increment the total count
                         total_count += 1
                         counted_ids.add(track_id)  # Mark this object as counted
 
-                        # Print gender, age, and update count
-                        print(f"Count: {total_count}, ID: {track_id}, Gender: {gender}, Age: {age}")
+                        # Capture the image of the person for age and gender prediction
+                        face_img = frame[y1:y2, x1:x2]
 
+                        # Save k (e.g., 1) image for age and gender detection
+                        for i in range(1):
+                            gender, age = get_age_gender(face_img)
+                            print(f"ID: {track_id}, Gender: {gender}, Age: {age}")
+                            import time
+                            time.sleep(0.5)  # Add a delay of 1 second between captures
+                        
                         # Write the updated count to the text file
                         write_count(total_count)
 
-                    # Draw the bounding box and the gender/age label
-                    label = f"ID: {track_id}, Gender: {gender}, Age: {age}"
-                    cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2, cv2.LINE_AA)
+                    # Draw the bounding box and the current count
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-
-        # Annotate the frame with the current count
-        cv2.putText(frame, f"Count: {total_count}", (10, 30),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                    cv2.putText(frame, f"Count: {total_count}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
         # Display the annotated frame
         cv2.imshow("YOLOv8 Tracking with Age and Gender Detection", frame)
