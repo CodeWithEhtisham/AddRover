@@ -1,6 +1,27 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
+<style>
+  #slot-list {
+      list-style-type: none; /* Remove default list styling */
+      padding: 0; /* Remove padding */
+  }
+
+  #slot-list li {
+      padding: 10px; /* Add some padding for each slot */
+      margin: 5px 0; /* Space between slots */
+      border-radius: 5px; /* Rounded corners */
+  }
+
+  .available {
+      background-color: lightgreen; /* Color for available slot */
+  }
+
+  .reserved {
+      background-color: lightcoral; /* Color for reserved slot */
+  }
+</style>
+
 
 <body>
   <!-- Layout wrapper -->
@@ -85,11 +106,11 @@
                         </div>
                         
                         <!-- Slot Display -->
-                        <div class="mb-3 col-12" id="available-slots" style="display: none;">
+                        <div class="mb-3 col-8" id="available-slots" style="display: none;">
                             <h5>Available Slots:</h5>
                             <ul id="slot-list"></ul>
                         </div>
-
+                        <input type="hidden" id="selected_slot" name="selected_slot" value="">
 
                           <div class="mb-3 col-10 d-flex flex-column align-items-end">
                             <button type="submit" class="btn btn-primary d-grid w-25 mt-auto">create ad</button>
@@ -174,20 +195,67 @@
       });
   }
 
-  function displaySlots(slots) {
-      const slotList = document.getElementById('slot-list');
-      slotList.innerHTML = '';  // Clear previous slots
-      if (slots.length > 0) {
-          document.getElementById('available-slots').style.display = 'block';  // Show available slots section
-          slots.forEach(slot => {
-              const li = document.createElement('li');
-              li.textContent = `Slot ${slot.slot_number}: ${slot.is_available ? 'Available' : 'Reserved'}`;
-              slotList.appendChild(li);
-          });
-      } else {
-          document.getElementById('available-slots').style.display = 'none';  // Hide if no slots
-      }
-  }
+  function fetchAvailableSlots(type, value) {
+        const url = '{% url "fetch_slots" %}';  // Backend URL to fetch slots
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',  // CSRF token for security
+            },
+            body: JSON.stringify({ 'type': type, 'value': value })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displaySlots(data.slots);
+            } else {
+                console.error(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    function displaySlots(slots) {
+        const slotList = document.getElementById('slot-list');
+        slotList.innerHTML = '';  // Clear previous slots
+        if (slots.length > 0) {
+            document.getElementById('available-slots').style.display = 'block';  // Show available slots section
+            slots.forEach(slot => {
+                const li = document.createElement('li');
+                li.textContent = `Slot ${slot.slot_number}: ${slot.is_available ? 'Available' : 'Reserved'}`;
+                // Apply classes based on availability
+                if (slot.is_available) {
+                    li.classList.add('available'); // Add class for available slot
+                    li.style.cursor = 'pointer'; // Change cursor to pointer
+                    li.addEventListener('click', function() {
+                        // Change the color of the selected slot
+                        if (li.style.backgroundColor === 'lightgreen') {
+                            li.style.backgroundColor = ''; // Deselect if already selected
+                            document.getElementById('selected_slot').value = ''; // Clear selected slot
+                        } else {
+                            // Reset colors for all slots
+                            Array.from(slotList.children).forEach(child => {
+                                child.style.backgroundColor = ''; // Clear all colors
+                            });
+                            li.style.backgroundColor = 'lightgreen'; // Highlight selected slot
+                            document.getElementById('selected_slot').value = slot.slot_number; // Set selected slot value
+                        }
+                    });
+                } else {
+                    li.classList.add('reserved'); // Add class for reserved slot
+                    li.style.backgroundColor = 'lightcoral'; // Color for reserved slot
+                }
+                slotList.appendChild(li);
+            });
+        } else {
+            document.getElementById('available-slots').style.display = 'none';  // Hide if no slots
+        }
+    }
+
+
 </script>
   {% include 'script.html'%}
 </body>
