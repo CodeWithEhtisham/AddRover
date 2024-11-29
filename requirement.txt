@@ -1,0 +1,11 @@
+
+deepface
+Pillow
+opencv-python
+pyqt5
+pyside2
+nvidia-riva-client
+numpy==1.22
+schedule
+django
+djangorestframework
