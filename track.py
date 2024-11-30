@@ -45,29 +45,31 @@ import cv2
 from ultralytics import YOLO
 
 # Load the YOLOv8 model
-model = YOLO('yolo11m.pt')
+model = YOLO('yolo11n.pt')
 
 # Open the video file
 video_path = "street.mp4"
 cap = cv2.VideoCapture(video_path)
 
-# Camera parameters (example values, you need to calibrate your camera to get actual values)
+# Export the model
+# model.export(format="engine")
+# # Camera parameters (example values, you need to calibrate your camera to get actual values)
 KNOWN_WIDTH = 0.2  # Known width of the object in meters (e.g., 20 cm)
 FOCAL_LENGTH = 800  # Focal length of the camera in pixels (this is an example value)
 
-def calculate_distance(known_width, focal_length, pixel_width):
-    return (known_width * focal_length) / pixel_width
+# def calculate_distance(known_width, focal_length, pixel_width):
+#     return (known_width * focal_length) / pixel_width
 
-# Loop through the video frames
+# # Loop through the video frames
 while cap.isOpened():
     # Read a frame from the video
     success, frame = cap.read()
 
     if success:
         # Run YOLOv8 tracking on the frame, persisting tracks between frames
-        results = model.track(frame, persist=True, classes=[0])  # Assuming class 0 is the object of interest
+        results = model.track(frame, persist=True,conf=0.7, classes=[0])  # Assuming class 0 is the object of interest
 
-        for result in results:
+        for result in results:  
             for detection in result.boxes:
                 # Get the bounding box coordinates
                 x1, y1, x2, y2 = map(int, detection.xyxy[0])
@@ -76,11 +78,11 @@ while cap.isOpened():
                 box_width = x2 - x1
 
                 # Calculate the distance to the object
-                distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, box_width)
+                # distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, box_width)
 
                 # Annotate the frame with distance information on the top-right corner of the bounding box
-                cv2.putText(frame, f"Distance: {distance:.2f} m", (x2, y1 - 10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                # cv2.putText(frame, f"Distance: {distance:.2f} m", (x2, y1 - 10),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
         # Visualize the results on the frame
         annotated_frame = results[0].plot()

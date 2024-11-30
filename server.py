@@ -40,12 +40,19 @@ async def handle_client(reader, writer):
     addr = writer.get_extra_info('peername')
     print(f"Connected to client {addr}")
 
-    # db_conn = await asyncpg.connect(dsn="postgresql://user:password@localhost/dbname")
     try:
         while True:
+            # Receive ad ID size
+            ad_id_size_data = await reader.readexactly(4)
+            ad_id_size = struct.unpack(">I", ad_id_size_data)[0]
+
+            # Receive ad ID
+            ad_id_data = await reader.readexactly(ad_id_size)
+            ad_id = ad_id_data.decode()
+
             # Receive frame size
-            size_data = await reader.readexactly(4)
-            frame_size = struct.unpack(">I", size_data)[0]
+            frame_size_data = await reader.readexactly(4)
+            frame_size = struct.unpack(">I", frame_size_data)[0]
 
             # Receive frame data
             frame_data = await reader.readexactly(frame_size)
@@ -55,12 +62,12 @@ async def handle_client(reader, writer):
                 print(f"Received invalid frame from {addr}")
                 continue
 
+            print(f"Received frame for Ad ID: {ad_id}")
+
             # Process the frame on GPU
             result = process_frame_on_gpu(frame)
             if result is not None:
-                # await update_database(db_conn, result)
                 await update_database(None, result)
-
             else:
                 print("Frame processing failed.")
 
@@ -69,10 +76,10 @@ async def handle_client(reader, writer):
     except Exception as e:
         print(f"Unexpected error with client {addr}: {e}")
     finally:
-        # await db_conn.close()
         writer.close()
         await writer.wait_closed()
         print(f"Connection to client {addr} closed.")
+
 
 # Main Server Loop
 async def main():

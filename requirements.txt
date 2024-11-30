@@ -2,10 +2,12 @@ sockets
 deepface
 Pillow
 opencv-python
-# pyqt5
-# pyside2
-# nvidia-riva-client
-# numpy==1.22
+ultralytics
 schedule
 django
 djangorestframework
+onnx>=1.12.0 
+onnxslim
+onnxruntime
+onnxruntime-gpu
+tensorrt>7.0.0,!=10.1.0
