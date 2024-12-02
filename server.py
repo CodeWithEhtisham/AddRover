@@ -2,43 +2,40 @@ import asyncio
 import struct
 import numpy as np
 import cv2
-# import torch
-# import asyncpg
+from ultralytics import YOLO  # Requires 'ultralytics' library for YOLO models
+from deepface import DeepFace  # Requires 'deepface' library for face recognition
+# Load YOLO model (pre-trained model for person detection and tracking)
+model = YOLO('yolo11n.pt')  # Use the smallest YOLOv8 model for speed
 
-# GPU Frame Processing
-def process_frame_on_gpu(frame):
+# GPU Frame Processing for Unique Person Counting
+def process_frame_on_gpu(frame, tracked_ids):
     try:
-        # tensor = torch.from_numpy(frame).permute(2, 0, 1).to(torch.device("cuda"))  # HWC -> CHW format
-        # tensor = tensor.float() / 255.0  # Normalize to [0, 1]
-        
-        # # Simulated processing (e.g., deep learning model inference)
-        # result = tensor.mean(dim=0)  # Dummy operation, replace with actual model
-        # return result.cpu().numpy()
-        cv2.imshow("frame", frame)
-        cv2.waitKey(1)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        frame = cv2.resize(frame, (100, 100))
-        frame = cv2.Canny(frame, 100, 200)
-        frame = cv2.GaussianBlur(frame, (5, 5), 0)
-        frame = cv2.threshold(frame, 128, 255, cv2.THRESH_BINARY)
-        return frame
+        # Run YOLO tracking inference
+        results = model.track(frame, persist=True, conf=0.7, classes=[0],verbose=False)  # Track 'person' class only
+        detections = results[0].boxes  # Get detected bounding boxes
+
+        # Update tracked IDs for unique person counting
+        for box in detections:
+            if box.id is not None:  # Each tracked person is assigned a unique ID
+                tracked_ids.add(box.id)
+        # return results[0].plot(),tracked_ids
+
+        # Return the updated set of unique tracked IDs
+        return tracked_ids
     except Exception as e:
         print(f"GPU processing error: {e}")
-        return None
-
-# Database Update
-async def update_database(db_conn, result):
-    try:
-        # query = "INSERT INTO processed_frames (result_data) VALUES ($1)"
-        # await db_conn.execute(query, result.tobytes())
-        print("Database updated successfully")
-    except Exception as e:
-        print(f"Database update error: {e}")
+        return tracked_ids
 
 # Client Handler
 async def handle_client(reader, writer):
     addr = writer.get_extra_info('peername')
     print(f"Connected to client {addr}")
+
+    # Variable to store counts and track unique IDs for each Ad ID
+    ad_data = {
+        "current_ad_id": None,
+        "unique_person_ids": set()  # Set to track unique person IDs
+    }
 
     try:
         while True:
@@ -49,6 +46,16 @@ async def handle_client(reader, writer):
             # Receive ad ID
             ad_id_data = await reader.readexactly(ad_id_size)
             ad_id = ad_id_data.decode()
+
+            # Check if a new Ad ID is received
+            if ad_id != ad_data["current_ad_id"]:
+                # Print previous Ad ID and unique person count if available
+                if ad_data["current_ad_id"] is not None:
+                    print(f"Ad ID: {ad_data['current_ad_id']} - Unique People Count: {len(ad_data['unique_person_ids'])}")
+
+                # Reset for the new Ad ID
+                ad_data["current_ad_id"] = ad_id
+                ad_data["unique_person_ids"] = set()  # Clear unique person IDs
 
             # Receive frame size
             frame_size_data = await reader.readexactly(4)
@@ -62,20 +69,22 @@ async def handle_client(reader, writer):
                 print(f"Received invalid frame from {addr}")
                 continue
 
-            print(f"Received frame for Ad ID: {ad_id}")
+            print(f"Processing frame for Ad ID: {ad_id}")
 
-            # Process the frame on GPU
-            result = process_frame_on_gpu(frame)
-            if result is not None:
-                await update_database(None, result)
-            else:
-                print("Frame processing failed.")
+            # Process the frame on GPU and update unique person IDs
+            frame , ad_data["unique_person_ids"] = process_frame_on_gpu(frame, ad_data["unique_person_ids"])
+            # cv2.imshow("Processed Frame", frame)
+            # cv2.waitKey(1)
 
     except asyncio.IncompleteReadError:
         print(f"Client {addr} disconnected")
     except Exception as e:
         print(f"Unexpected error with client {addr}: {e}")
     finally:
+        # Print final count for the last Ad ID before closing
+        if ad_data["current_ad_id"] is not None:
+            print(f"Ad ID: {ad_data['current_ad_id']} - Unique People Count: {len(ad_data['unique_person_ids'])}")
+
         writer.close()
         await writer.wait_closed()
         print(f"Connection to client {addr} closed.")
