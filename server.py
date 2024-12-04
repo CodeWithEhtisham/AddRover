@@ -3,12 +3,15 @@ import struct
 import numpy as np
 import cv2
 from ultralytics import YOLO  # Requires 'ultralytics' library for YOLO models
-from deepface import DeepFace  # Requires 'deepface' library for face recognition
-# Load YOLO model (pre-trained model for person detection and tracking)
-model = YOLO('yolo11n.pt')  # Use the smallest YOLOv8 model for speed
+from deepface import DeepFace as df  # Requires 'deepface' library for face recognition
 
+# Load YOLO model (pre-trained model for person detection and tracking)
+model = YOLO('yolo11s.pt')  # Use the smallest YOLOv8 model for speed
+keys = ['age', 'gender']
 # GPU Frame Processing for Unique Person Counting
-def process_frame_on_gpu(frame, tracked_ids):
+
+def process_frame_on_gpu(frame, tracked_ids, person_data):
+    info = None
     try:
         # Run YOLO tracking inference
         results = model.track(frame, persist=True, conf=0.7, classes=[0],verbose=False)  # Track 'person' class only
@@ -17,11 +20,20 @@ def process_frame_on_gpu(frame, tracked_ids):
         # Update tracked IDs for unique person counting
         for box in detections:
             if box.id is not None:  # Each tracked person is assigned a unique ID
-                tracked_ids.add(box.id)
-        # return results[0].plot(),tracked_ids
+                if int(box.id) not in tracked_ids:
+                    crop_box = box.xyxy.numpy()[0]
+                    try:
+                        info = df.analyze(frame[int(crop_box[1]):int(crop_box[3]), int(crop_box[0]):int(crop_box[2])], actions=["age","gender"], detector_backend='yolov8')[0]
+                        if info is not None:
+                            person_data[str(int(box.id))] = {keys[0]: info[keys[0]], keys[1]: info['dominant_gender']}
+                    except:
+                        print("Face Not Detected")
+                        
+                tracked_ids.add(int(box.id))
+        return results[0].plot(),tracked_ids, person_data
 
         # Return the updated set of unique tracked IDs
-        return tracked_ids
+        # return tracked_ids
     except Exception as e:
         print(f"GPU processing error: {e}")
         return tracked_ids
@@ -37,6 +49,8 @@ async def handle_client(reader, writer):
         "unique_person_ids": set()  # Set to track unique person IDs
     }
 
+    person_data = {}
+
     try:
         while True:
             # Receive ad ID size
@@ -51,7 +65,7 @@ async def handle_client(reader, writer):
             if ad_id != ad_data["current_ad_id"]:
                 # Print previous Ad ID and unique person count if available
                 if ad_data["current_ad_id"] is not None:
-                    print(f"Ad ID: {ad_data['current_ad_id']} - Unique People Count: {len(ad_data['unique_person_ids'])}")
+                    print(f"Ad ID: {ad_data['current_ad_id']} - Unique People Count: {len(ad_data['unique_person_ids'])} - Person Data: {person_data}")
 
                 # Reset for the new Ad ID
                 ad_data["current_ad_id"] = ad_id
@@ -72,9 +86,9 @@ async def handle_client(reader, writer):
             print(f"Processing frame for Ad ID: {ad_id}")
 
             # Process the frame on GPU and update unique person IDs
-            frame , ad_data["unique_person_ids"] = process_frame_on_gpu(frame, ad_data["unique_person_ids"])
-            # cv2.imshow("Processed Frame", frame)
-            # cv2.waitKey(1)
+            frame , ad_data["unique_person_ids"], person_data = process_frame_on_gpu(frame, ad_data["unique_person_ids"], person_data)
+            cv2.imshow("Processed Frame", frame)
+            cv2.waitKey(1)
 
     except asyncio.IncompleteReadError:
         print(f"Client {addr} disconnected")
@@ -93,7 +107,7 @@ async def handle_client(reader, writer):
 # Main Server Loop
 async def main():
     try:
-        server = await asyncio.start_server(handle_client, 'localhost', 12345)
+        server = await asyncio.start_server(handle_client, '192.168.16.116', 12345)
         print("Server is running...")
         async with server:
             await server.serve_forever()
