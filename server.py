@@ -5,8 +5,16 @@ import cv2
 from ultralytics import YOLO  # Requires 'ultralytics' library for YOLO models
 from deepface import DeepFace as df  # Requires 'deepface' library for face recognition
 import threading as th
+from datetime import datetime
+import json
 
 # Load YOLO model (pre-trained model for person detection and tracking)
+dump_data = []
+
+with open('data.json') as file:
+    dump_data = json.load(file)
+
+
 model = YOLO('yolo11s.pt')  # Use the smallest YOLOv8 model for speed
 person_data = {}
 alignment_modes = [True, False]
@@ -16,11 +24,11 @@ threads = []
 
 def age_gen_detect(id, frame):
     try:
-        info = df.analyze(frame, actions=["age","gender"], detector_backend=backend_model, enforce_detection=False)[0]
-        person_data[id] = {'age': info['age'], 'gender': info['dominant_gender']}
-    
+        info = df.analyze(frame, actions=["age","gender"], detector_backend=backend_model)[0]
+        person_data[id] = {'counted': True, 'age': info['age'], 'gender': info['dominant_gender']}
+
     except:
-        person_data.pop(id, None)
+        pass
 
 
 def process_frame_on_gpu(frame, tracked_ids):
@@ -41,27 +49,28 @@ def process_frame_on_gpu(frame, tracked_ids):
         # Update tracked IDs for unique person counting
         for box in detections:
             if box.id is not None:  # Each tracked person is assigned a unique ID
-                str_id = str(int(box.id))
-                crop_box = box.xyxy.numpy()[0]
-                crop_frame = frame[int(crop_box[1]):int(crop_box[3]), int(crop_box[0]):int(crop_box[2])]
-                try:
-                    info = df.extract_faces(
-                                        img_path = crop_frame,
-                                        detector_backend = backend_model,
-                                        align = alignment_modes[1],
-                                        enforce_detection=True,
-                                        )[0]['facial_area']
-                    
-                    if str_id not in person_data.keys():
-                        thread = th.Thread(target=age_gen_detect, args=(str_id, crop_frame), daemon=True)
-                        threads.append(thread)
-                        thread.start()
+                if int(box.id) not in tracked_ids:
+                    str_id = str(int(box.id))
+                    person_data[str_id] = {'counted': False, 'age': None, 'gender': None}
+                    crop_box = box.xyxy.numpy()[0]
+                    crop_frame = frame[int(crop_box[1]):int(crop_box[3]), int(crop_box[0]):int(crop_box[2])]
+                    try:
+                        info = df.extract_faces(
+                                            img_path = crop_frame,
+                                            detector_backend = backend_model,
+                                            align = alignment_modes[1],
+                                            enforce_detection=True,
+                                            )[0]['facial_area']
+                        
+                        if not person_data[str_id]['counted']:
+                            thread = th.Thread(target=age_gen_detect, args=(str_id, crop_frame), daemon=True)
+                            threads.append(thread)
+                            thread.start()
 
-                except Exception as e:
-                    print("Face Not Detected", e)
-                
-                person_data[str_id] = None
-                tracked_ids.add(int(box.id))
+                    except Exception as e:
+                        print("Face Not Detected", e)
+                    
+                    tracked_ids.add(int(box.id))
         print(f"Number of persons in frame: {len(tracked_ids)}, Number of threads initialized: {len(threads)}")
         return results[0].plot(),tracked_ids
 
@@ -73,6 +82,7 @@ def process_frame_on_gpu(frame, tracked_ids):
 
 # Client Handler
 async def handle_client(reader, writer):
+    global person_data
     addr = writer.get_extra_info('peername')
     print(f"Connected to client {addr}")
 
@@ -81,8 +91,6 @@ async def handle_client(reader, writer):
         "current_ad_id": None,
         "unique_person_ids": set()  # Set to track unique person IDs
     }
-
-    person_data = {}
 
     try:
         while True:
@@ -98,11 +106,20 @@ async def handle_client(reader, writer):
             if ad_id != ad_data["current_ad_id"]:
                 # Print previous Ad ID and unique person count if available
                 if ad_data["current_ad_id"] is not None:
+                    data = {'ad id': ad_id,
+                            'time': datetime.now().strftime("%H:%M, %d-%m-%Y"), 
+                            'total persons':len(ad_data['unique_person_ids']),
+                            'person data': person_data}
+                    
+                    dump_data.append(data)
+                    with open('data.json', 'w') as file:
+                        json.dump(dump_data, file)
                     print(f"Ad ID: {ad_data['current_ad_id']} - Unique People Count: {len(ad_data['unique_person_ids'])} - Person Data: {person_data}")
 
                 # Reset for the new Ad ID
                 ad_data["current_ad_id"] = ad_id
                 ad_data["unique_person_ids"] = set()  # Clear unique person IDs
+                person_data = {}
 
             # Receive frame size
             frame_size_data = await reader.readexactly(4)

@@ -1,0 +1,147 @@
+[
+    {
+        "ad id": "ad1.mp4",
+        "time": "18:15, 05-12-2024",
+        "total persons": 0,
+        "person data": {}
+    },
+    {
+        "ad id": "street.mp4",
+        "time": "18:15, 05-12-2024",
+        "total persons": 1,
+        "person data": {
+            "1": {
+                "counted": false,
+                "age": null,
+                "gender": null
+            }
+        }
+    },
+    {
+        "ad id": "ad1.mp4",
+        "time": "18:15, 05-12-2024",
+        "total persons": 1,
+        "person data": {
+            "1": {
+                "counted": false,
+                "age": null,
+                "gender": null
+            }
+        }
+    },
+    {
+        "ad id": "street.mp4",
+        "time": "18:15, 05-12-2024",
+        "total persons": 1,
+        "person data": {
+            "1": {
+                "counted": false,
+                "age": null,
+                "gender": null
+            }
+        }
+    },
+    {
+        "ad id": "ad1.mp4",
+        "time": "18:16, 05-12-2024",
+        "total persons": 2,
+        "person data": {
+            "1": {
+                "counted": false,
+                "age": null,
+                "gender": null
+            },
+            "2": {
+                "counted": true,
+                "age": 26,
+                "gender": "Man"
+            }
+        }
+    },
+    {
+        "ad id": "street.mp4",
+        "time": "18:17, 05-12-2024",
+        "total persons": 3,
+        "person data": {
+            "1": {
+                "counted": true,
+                "age": 27,
+                "gender": "Man"
+            },
+            "2": {
+                "counted": false,
+                "age": null,
+                "gender": null
+            },
+            "3": {
+                "counted": true,
+                "age": 27,
+                "gender": "Man"
+            }
+        }
+    },
+    {
+        "ad id": "ad1.mp4",
+        "time": "18:20, 05-12-2024",
+        "total persons": 4,
+        "person data": {
+            "1": {
+                "counted": true,
+                "age": 31,
+                "gender": "Man"
+            },
+            "3": {
+                "counted": false,
+                "age": null,
+                "gender": null
+            },
+            "5": {
+                "counted": true,
+                "age": 25,
+                "gender": "Man"
+            },
+            "6": {
+                "counted": true,
+                "age": 28,
+                "gender": "Man"
+            }
+        }
+    },
+    {
+        "ad id": "street.mp4",
+        "time": "18:21, 05-12-2024",
+        "total persons": 6,
+        "person data": {
+            "5": {
+                "counted": false,
+                "age": null,
+                "gender": null
+            },
+            "1": {
+                "counted": true,
+                "age": 35,
+                "gender": "Man"
+            },
+            "9": {
+                "counted": true,
+                "age": 33,
+                "gender": "Man"
+            },
+            "10": {
+                "counted": false,
+                "age": null,
+                "gender": null
+            },
+            "13": {
+                "counted": false,
+                "age": null,
+                "gender": null
+            },
+            "15": {
+                "counted": false,
+                "age": null,
+                "gender": null
+            }
+        }
+    }
+]
