@@ -8,6 +8,9 @@ from deepface import DeepFace as df  # Requires 'deepface' library for face reco
 # Load YOLO model (pre-trained model for person detection and tracking)
 model = YOLO('yolo11s.pt')  # Use the smallest YOLOv8 model for speed
 keys = ['age', 'gender']
+person_data = {}
+alignment_modes = [True, False]
+backend_model='yolov8'
 # GPU Frame Processing for Unique Person Counting
 
 def process_frame_on_gpu(frame, tracked_ids, person_data):
@@ -23,11 +26,18 @@ def process_frame_on_gpu(frame, tracked_ids, person_data):
                 if int(box.id) not in tracked_ids:
                     crop_box = box.xyxy.numpy()[0]
                     try:
-                        info = df.analyze(frame[int(crop_box[1]):int(crop_box[3]), int(crop_box[0]):int(crop_box[2])], actions=["age","gender"], detector_backend='yolov8')[0]
-                        if info is not None:
-                            person_data[str(int(box.id))] = {keys[0]: info[keys[0]], keys[1]: info['dominant_gender']}
-                    except:
-                        print("Face Not Detected")
+                        info = df.extract_faces(
+                                            img_path = frame[int(crop_box[1]):int(crop_box[3]), int(crop_box[0]):int(crop_box[2])], 
+                                            detector_backend = backend_model,
+                                            align = alignment_modes[1],
+                                            enforce_detection=True,
+                                            )
+                        # info = df.analyze(frame[int(crop_box[1]):int(crop_box[3]), int(crop_box[0]):int(crop_box[2])], actions=["age","gender"], detector_backend=backend_model)[0]
+                        # if info is not None:
+                        #     person_data[str(int(box.id))] = {keys[0]: info[keys[0]], keys[1]: info['dominant_gender']}
+                        print(info[0]['facial_area'])
+                    except Exception as e:
+                        print("Face Not Detected", e)
                         
                 tracked_ids.add(int(box.id))
         return results[0].plot(),tracked_ids, person_data
@@ -107,8 +117,8 @@ async def handle_client(reader, writer):
 # Main Server Loop
 async def main():
     try:
-        server = await asyncio.start_server(handle_client, '192.168.16.116', 12345)
-        print("Server is running...")
+        server = await asyncio.start_server(handle_client, '127.0.0.1', 12345)
+        print("Server is running on this ip :",server.sockets[0].getsockname())
         async with server:
             await server.serve_forever()
     except KeyboardInterrupt:
