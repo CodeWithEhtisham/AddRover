@@ -15,8 +15,12 @@ threads = []
 # GPU Frame Processing for Unique Person Counting
 
 def age_gen_detect(id, frame):
-    info = df.analyze(frame, actions=["age","gender"], detector_backend=backend_model)[0]
-    person_data[id] = {'age': info['age'], 'gender': info['dominant_gender']}
+    try:
+        info = df.analyze(frame, actions=["age","gender"], detector_backend=backend_model, enforce_detection=False)[0]
+        person_data[id] = {'age': info['age'], 'gender': info['dominant_gender']}
+    
+    except:
+        person_data.pop(id, None)
 
 
 def process_frame_on_gpu(frame, tracked_ids):
@@ -37,25 +41,26 @@ def process_frame_on_gpu(frame, tracked_ids):
         # Update tracked IDs for unique person counting
         for box in detections:
             if box.id is not None:  # Each tracked person is assigned a unique ID
-                if int(box.id) not in tracked_ids:
-                    crop_box = box.xyxy.numpy()[0]
-                    try:
-                        info = df.extract_faces(
-                                            img_path = frame[int(crop_box[1]):int(crop_box[3]), int(crop_box[0]):int(crop_box[2])], 
-                                            detector_backend = backend_model,
-                                            align = alignment_modes[1],
-                                            enforce_detection=True,
-                                            )[0]['facial_area']
-                        thread = th.Thread(target=age_gen_detect, args=(int(box.id), frame[int(crop_box[1]):int(crop_box[3]), int(crop_box[0]):int(crop_box[2])]), daemon=True)
+                str_id = str(int(box.id))
+                crop_box = box.xyxy.numpy()[0]
+                crop_frame = frame[int(crop_box[1]):int(crop_box[3]), int(crop_box[0]):int(crop_box[2])]
+                try:
+                    info = df.extract_faces(
+                                        img_path = crop_frame,
+                                        detector_backend = backend_model,
+                                        align = alignment_modes[1],
+                                        enforce_detection=True,
+                                        )[0]['facial_area']
+                    
+                    if str_id not in person_data.keys():
+                        thread = th.Thread(target=age_gen_detect, args=(str_id, crop_frame), daemon=True)
                         threads.append(thread)
                         thread.start()
 
-
-
-                        print(info[0]['facial_area'])
-                    except Exception as e:
-                        print("Face Not Detected", e)
-                        
+                except Exception as e:
+                    print("Face Not Detected", e)
+                
+                person_data[str_id] = None
                 tracked_ids.add(int(box.id))
         print(f"Number of persons in frame: {len(tracked_ids)}, Number of threads initialized: {len(threads)}")
         return results[0].plot(),tracked_ids
