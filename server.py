@@ -4,16 +4,30 @@ import numpy as np
 import cv2
 from ultralytics import YOLO  # Requires 'ultralytics' library for YOLO models
 from deepface import DeepFace as df  # Requires 'deepface' library for face recognition
+import threading as th
 
 # Load YOLO model (pre-trained model for person detection and tracking)
 model = YOLO('yolo11s.pt')  # Use the smallest YOLOv8 model for speed
-keys = ['age', 'gender']
 person_data = {}
 alignment_modes = [True, False]
 backend_model='yolov8'
+threads = []
 # GPU Frame Processing for Unique Person Counting
 
-def process_frame_on_gpu(frame, tracked_ids, person_data):
+def age_gen_detect(id, frame):
+    info = df.analyze(frame, actions=["age","gender"], detector_backend=backend_model)[0]
+    person_data[id] = {'age': info['age'], 'gender': info['dominant_gender']}
+
+
+def process_frame_on_gpu(frame, tracked_ids):
+
+    if threads is not []:
+        for i in range(len(threads)):
+            if not threads[i].is_alive():
+                threads.pop(i)
+                print("thread destroyed")
+        print(f"{len(threads)} threads alive..")
+
     info = None
     try:
         # Run YOLO tracking inference
@@ -31,16 +45,20 @@ def process_frame_on_gpu(frame, tracked_ids, person_data):
                                             detector_backend = backend_model,
                                             align = alignment_modes[1],
                                             enforce_detection=True,
-                                            )
-                        # info = df.analyze(frame[int(crop_box[1]):int(crop_box[3]), int(crop_box[0]):int(crop_box[2])], actions=["age","gender"], detector_backend=backend_model)[0]
-                        # if info is not None:
-                        #     person_data[str(int(box.id))] = {keys[0]: info[keys[0]], keys[1]: info['dominant_gender']}
+                                            )[0]['facial_area']
+                        thread = th.Thread(target=age_gen_detect, args=(int(box.id), frame[int(crop_box[1]):int(crop_box[3]), int(crop_box[0]):int(crop_box[2])]), daemon=True)
+                        threads.append(thread)
+                        thread.start()
+
+
+
                         print(info[0]['facial_area'])
                     except Exception as e:
                         print("Face Not Detected", e)
                         
                 tracked_ids.add(int(box.id))
-        return results[0].plot(),tracked_ids, person_data
+        print(f"Number of persons in frame: {len(tracked_ids)}, Number of threads initialized: {len(threads)}")
+        return results[0].plot(),tracked_ids
 
         # Return the updated set of unique tracked IDs
         # return tracked_ids
@@ -96,9 +114,10 @@ async def handle_client(reader, writer):
             print(f"Processing frame for Ad ID: {ad_id}")
 
             # Process the frame on GPU and update unique person IDs
-            frame , ad_data["unique_person_ids"], person_data = process_frame_on_gpu(frame, ad_data["unique_person_ids"], person_data)
+            frame , ad_data["unique_person_ids"] = process_frame_on_gpu(frame, ad_data["unique_person_ids"])
             cv2.imshow("Processed Frame", frame)
             cv2.waitKey(1)
+
 
     except asyncio.IncompleteReadError:
         print(f"Client {addr} disconnected")
@@ -117,7 +136,7 @@ async def handle_client(reader, writer):
 # Main Server Loop
 async def main():
     try:
-        server = await asyncio.start_server(handle_client, '127.0.0.1', 12345)
+        server = await asyncio.start_server(handle_client, '192.168.16.116', 12345)
         print("Server is running on this ip :",server.sockets[0].getsockname())
         async with server:
             await server.serve_forever()
