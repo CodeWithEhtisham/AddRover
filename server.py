@@ -19,7 +19,7 @@ model = YOLO('yolo11s.pt')  # Use the smallest YOLOv8 model for speed
 person_data = {}
 alignment_modes = [True, False]
 backend_model='yolov8'
-threads = []
+threads = {}
 # GPU Frame Processing for Unique Person Counting
 
 def age_gen_detect(id, frame):
@@ -33,14 +33,13 @@ def age_gen_detect(id, frame):
 
 def process_frame_on_gpu(frame, tracked_ids):
 
-    if threads is not []:
-        for i in range(len(threads)):
-            if not threads[i].is_alive():
-                threads.pop(i)
+    if threads != {}:
+        for id, thread in threads.copy().items():
+            if not thread.is_alive():
+                threads.pop(id)
                 print("thread destroyed")
-        print(f"{len(threads)} threads alive..")
+        print(f"{len(threads.keys())} threads alive..")
 
-    info = None
     try:
         # Run YOLO tracking inference
         results = model.track(frame, persist=True, conf=0.7, classes=[0],verbose=False)  # Track 'person' class only
@@ -48,10 +47,14 @@ def process_frame_on_gpu(frame, tracked_ids):
 
         # Update tracked IDs for unique person counting
         for box in detections:
+            info = None
             if box.id is not None:  # Each tracked person is assigned a unique ID
-                if int(box.id) not in tracked_ids:
-                    str_id = str(int(box.id))
+                # if int(box.id) not in tracked_ids:
+                str_id = str(int(box.id))
+                if str_id not in person_data.keys():
                     person_data[str_id] = {'counted': False, 'age': None, 'gender': None}
+                
+                if not person_data[str_id]['counted']:
                     crop_box = box.xyxy.numpy()[0]
                     crop_frame = frame[int(crop_box[1]):int(crop_box[3]), int(crop_box[0]):int(crop_box[2])]
                     try:
@@ -61,16 +64,15 @@ def process_frame_on_gpu(frame, tracked_ids):
                                             align = alignment_modes[1],
                                             enforce_detection=True,
                                             )[0]['facial_area']
-                        
-                        if not person_data[str_id]['counted']:
+                        if str_id not in threads.keys() and (info is not None):
                             thread = th.Thread(target=age_gen_detect, args=(str_id, crop_frame), daemon=True)
-                            threads.append(thread)
+                            threads[str_id] = thread
                             thread.start()
 
                     except Exception as e:
                         print("Face Not Detected", e)
                     
-                    tracked_ids.add(int(box.id))
+                tracked_ids.add(int(box.id))
         print(f"Number of persons in frame: {len(tracked_ids)}, Number of threads initialized: {len(threads)}")
         return results[0].plot(),tracked_ids
 
@@ -158,7 +160,7 @@ async def handle_client(reader, writer):
 # Main Server Loop
 async def main():
     try:
-        server = await asyncio.start_server(handle_client, '192.168.16.116', 12345)
+        server = await asyncio.start_server(handle_client, '192.168.0.101', 12345)
         print("Server is running on this ip :",server.sockets[0].getsockname())
         async with server:
             await server.serve_forever()
