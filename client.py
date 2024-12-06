@@ -5,7 +5,7 @@ import struct
 import time
 
 # Simulate an ad display system (displaying ads from folder)
-async def display_ads(ad_queue, ad_folder="ads", default_image_duration=10, fps=30):
+async def display_ads(ad_queue, ad_folder="advertisement", default_image_duration=10, fps=30):
     while True:
         # Get list of files in the 'ads' folder (only videos/images)
         ads = [ad for ad in os.listdir(ad_folder) if ad.endswith((".mp4", ".jpg", ".png"))]
@@ -40,7 +40,8 @@ async def display_ads(ad_queue, ad_folder="ads", default_image_duration=10, fps=
                     ret, ad_frame = ad_cap.read()
                     if not ret:
                         break  # Break out when video ends
-                    
+                    cv2.namedWindow('Ad Display', cv2.WINDOW_NORMAL)
+                    cv2.setWindowProperty('Ad Display', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
                     # Display the ad frame
                     cv2.imshow("Ad Display", ad_frame)
                     if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -76,7 +77,7 @@ async def send_frames(server_ip='localhost', server_port=12345, fps=30, ad_queue
             print("Connected to the server")
 
             # Open video source (street.mp4)
-            cap = cv2.VideoCapture("street.mp4")
+            cap = cv2.VideoCapture(0)
             if not cap.isOpened():
                 print("Error: Unable to open street.mp4.")
                 return
@@ -86,6 +87,8 @@ async def send_frames(server_ip='localhost', server_port=12345, fps=30, ad_queue
                 if not ret:
                     print("No frame captured, exiting.")
                     break
+
+                frame = cv2.resize(frame, (320, 240),interpolation=cv2.INTER_AREA) 
 
                 # Get the current ad ID, fallback to the last known ad if queue is empty
                 if not ad_queue.empty():
@@ -116,7 +119,7 @@ async def send_frames(server_ip='localhost', server_port=12345, fps=30, ad_queue
                 # Control frame rate for the street.mp4 stream
                 await asyncio.sleep(1 / fps)
 
-        except ConnectionRefusedError:
+        except Exception as e:
             print("Connection refused. Server might be down. Retrying in 5 seconds...")
             await asyncio.sleep(5)  # Wait before retrying
         except KeyboardInterrupt:
@@ -137,7 +140,7 @@ async def main():
     ad_queue = asyncio.Queue()
     await asyncio.gather(
         display_ads(ad_queue),
-        send_frames(server_ip='localhost', server_port=12345, ad_queue=ad_queue)
+        send_frames(server_ip='192.168.0.101', server_port=12345, ad_queue=ad_queue)
     )
 
 # Run the client
