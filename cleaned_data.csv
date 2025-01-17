@@ -1,0 +1,18 @@
+ad id,time,person id,counted,age,gender,normalized_age,weekday
+street.mp4,2024-12-05 18:15:00,1,False,,,0.0,Thursday
+ad1.mp4,2024-12-05 18:15:00,1,False,,,0.0,Thursday
+ad1.mp4,2024-12-05 18:16:00,1,False,,,0.0,Thursday
+ad1.mp4,2024-12-05 18:16:00,2,True,26.0,Man,0.7428571428571429,Thursday
+street.mp4,2024-12-05 18:17:00,1,True,27.0,Man,0.7714285714285714,Thursday
+street.mp4,2024-12-05 18:17:00,2,False,,,0.0,Thursday
+street.mp4,2024-12-05 18:17:00,3,True,27.0,Man,0.7714285714285714,Thursday
+ad1.mp4,2024-12-05 18:20:00,1,True,31.0,Man,0.8857142857142857,Thursday
+ad1.mp4,2024-12-05 18:20:00,3,False,,,0.0,Thursday
+ad1.mp4,2024-12-05 18:20:00,5,True,25.0,Man,0.7142857142857143,Thursday
+ad1.mp4,2024-12-05 18:20:00,6,True,28.0,Man,0.7999999999999999,Thursday
+street.mp4,2024-12-05 18:21:00,5,False,,,0.0,Thursday
+street.mp4,2024-12-05 18:21:00,1,True,35.0,Man,1.0,Thursday
+street.mp4,2024-12-05 18:21:00,9,True,33.0,Man,0.9428571428571428,Thursday
+street.mp4,2024-12-05 18:21:00,10,False,,,0.0,Thursday
+street.mp4,2024-12-05 18:21:00,13,False,,,0.0,Thursday
+street.mp4,2024-12-05 18:21:00,15,False,,,0.0,Thursday
