@@ -1,0 +1,16 @@
+sockets
+wordcloud
+streamlit
+plotly
+deepface
+Pillow
+opencv-python
+ultralytics
+schedule
+django
+djangorestframework
+onnx>=1.12.0 
+onnxslim
+onnxruntime
+onnxruntime-gpu
+tensorrt>7.0.0,!=10.1.0
